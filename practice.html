@@ -1,0 +1,556 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Practice papers · DL7606</title><meta name="claude:viewport-fit-sides" content="cover"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;600&display=swap"><link rel="stylesheet" href="style.css"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style><style>.ptool{position:sticky;top:calc(env(safe-area-inset-top,0px) + 51px);z-index:10;background:var(--paper);border-bottom:1px solid var(--line);padding-block:8px;display:grid;gap:6px;margin-top:8px}.ptool .tabs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.ptool .timer{padding:5px 10px}.paper .paperhead{margin-top:16px}</style></head><body data-page="13"><header class="topbar"><div class="in"><a class="badge" href="index.html" aria-label="All chapters">DL·7606</a><span class="pt">13 · Practice papers</span><button class="ibtn" data-fs="-1" aria-label="Smaller text">A−</button><button class="ibtn" data-fs="1" aria-label="Larger text">A+</button></div><div class="progress"></div></header><main class="wrap"><header class="pagehead"><div class="tag">13 · Exam practice</div><h1>Practice papers<span class="zh">模擬試卷</span></h1><p class="lede">Three full papers in the style of your section's finals, 100 marks and 2 hours each, closed book, calculator allowed.</p></header><div class="callout tip"><div class="lab">How to use</div><ul><li>Write answers on paper first, then open each answer to mark yourself and type your marks in the box. Scores stay on this phone.</li><li><b>Paper C is new</b> and covers lectures 6–7. Paper A covers lectures 1–5; Paper B mixes architectures, GAN, LLM efficiency and "design the weights" puzzles.</li><li>Every calculated answer was checked by computer.</li></ul></div><div class="ptool"><div class="tabs"><button class="ibtn on" data-tab="A">Paper A</button><button class="ibtn" data-tab="B">Paper B</button><button class="ibtn" data-tab="C">Paper C · new</button></div><div class="tabs"><span class="timer" id="timer">2:00:00</span><button class="ibtn" id="tstart">Start timer</button><button class="ibtn" id="treset">Reset</button></div><div class="tabs"><button class="ibtn" id="showall">Show all answers</button><span class="total" id="total">Score: 0 / 100</span></div></div><section id="paperA" class="paper">
+<div class="paperhead">
+ <h2>Paper A<span class="zh">試卷 A：講義 1–5</span></h2>
+ <div class="meta">7 questions · 100 marks · 2 hours · answer all questions</div>
+</div>
+
+<!-- A1 -->
+<div class="qcard" data-max="12">
+ <h3 id="s1"><span class="num">01</span>Question 1 · Perceptrons and logic<span class="marks">12 marks</span></h3>
+ <p>A perceptron has inputs x₁, x₂ ∈ {0,1}, a bias input fixed at 1 with weight w₀, weights w₁, w₂, and step activation f(z) = 1 if z &gt; 0, else 0.</p>
+ <div class="part"><span class="pl">(a)</span>(4 marks) Give values for w₀, w₁, w₂ so the perceptron computes NAND. Show the inequalities you used.</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <p>NAND outputs 1, 1, 1, 0 for (0,0), (0,1), (1,0), (1,1).</p>
+  <div class="formula">(0,0): w₀ &gt; 0          (0,1): w₀ + w₂ &gt; 0
+(1,0): w₀ + w₁ &gt; 0     (1,1): w₀ + w₁ + w₂ &lt; 0
+Choose w₁ = w₂ = −100 → need 100 &lt; w₀ &lt; 200 → w₀ = 150.     W = (150, −100, −100)</div>
+  <div class="why"><b class="lab">Why</b>NAND = NOT AND, so negating every AND weight (−150, 100, 100) flips the sign of z and therefore the output. Any values satisfying all four inequalities get full marks.</div></details>
+
+ <div class="part"><span class="pl">(b)</span>(4 marks) Start from the OR perceptron W = (−50, 100, 100). Can you change <b>only one</b> weight so that it computes y = x₁ AND (NOT x₂)? If yes, give it; if no, explain.</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <p><b>Yes: change w₂ to −100</b>, giving W = (−50, 100, −100).</p>
+  <div class="formula">(0,0): −50 → 0 ✓     (0,1): −150 → 0 ✓     (1,0): 50 → 1 ✓     (1,1): −50 → 0 ✓</div>
+  <div class="why"><b class="lab">Why</b>Required: w₀ &lt; 0, w₀ + w₂ &lt; 0, w₀ + w₁ &gt; 0, w₀ + w₁ + w₂ &lt; 0. With w₀ = −50, w₁ = 100 fixed, the first and third already hold; the other two need w₂ &lt; 50 and w₂ &lt; −50. Geometrically, the separating line is rotated so that only the point (1,0) is on the positive side.</div></details>
+
+ <div class="part"><span class="pl">(c)</span>(4 marks) Can a single perceptron compute XNOR (output 1 when x₁ = x₂)? If not, build a two-layer network for it using gates from (a), (b) or the lecture, and give all weights.</div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <p>No. The 1-points (0,0) and (1,1) lie on opposite corners from the 0-points (0,1), (1,0); no single straight line separates them (same reason as XOR). Use XNOR = (x₁ AND x₂) OR (NOR(x₁, x₂)):</p>
+  <div class="tbl"><table><tr><th>Unit</th><th>Computes</th><th>w₀</th><th>w₁</th><th>w₂</th></tr>
+  <tr><td>Hidden h₁</td><td>x₁ AND x₂</td><td class="n">−150</td><td class="n">100</td><td class="n">100</td></tr>
+  <tr><td>Hidden h₂</td><td>NOR(x₁, x₂)</td><td class="n">50</td><td class="n">−100</td><td class="n">−100</td></tr>
+  <tr><td>Output</td><td>h₁ OR h₂</td><td class="n">−50</td><td class="n">100</td><td class="n">100</td></tr></table></div>
+  <div class="why"><b class="lab">Why</b>Check NOR: (0,0) → 50 &gt; 0 → 1; any single 1 gives −50 → 0. A hidden layer gives two lines; the output unit combines the two half-planes. This is the lecture's point that NOT, AND, OR make the network logically complete.</div></details>
+ <div class="scorebox"><label for="sA1">Your marks</label><input id="sA1" type="number" min="0" max="12" inputmode="numeric"> / 12</div>
+</div>
+
+<!-- A2 -->
+<div class="qcard" data-max="16">
+ <h3 id="s2"><span class="num">02</span>Question 2 · CNN layer arithmetic<span class="marks">16 marks</span></h3>
+ <p>CONVn-N = N filters of size n×n, stride 1, padding chosen so height and width are unchanged ("same"). POOL2 = 2×2 max pooling, stride 2. FC-N = fully connected with N neurons. Every conv and FC neuron has a bias.</p>
+ <div class="given">Layer 0  Input      28×28×1
+Layer 1  CONV5-6
+Layer 2  POOL2
+Layer 3  CONV3-16
+Layer 4  POOL2
+Layer 5  FLATTEN
+Layer 6  FC-10</div>
+ <div class="part"><span class="pl">(a)</span>(10 marks) For layers 1–6 give the output dimension, number of parameters, number of multiplications and the local receptive field (LRF) on the input.</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="tbl"><table><tr><th>Layer</th><th>Output</th><th class="n">Parameters</th><th class="n">Multiplications</th><th>LRF</th></tr>
+  <tr><td>1 CONV5-6 (P=2)</td><td class="n">28×28×6</td><td class="n">6·(5·5·1+1) = 156</td><td class="n">28·28·6·25 = 117,600</td><td>5×5</td></tr>
+  <tr><td>2 POOL2</td><td class="n">14×14×6</td><td class="n">0</td><td class="n">0</td><td>6×6</td></tr>
+  <tr><td>3 CONV3-16 (P=1)</td><td class="n">14×14×16</td><td class="n">16·(3·3·6+1) = 880</td><td class="n">14·14·16·54 = 169,344</td><td>10×10</td></tr>
+  <tr><td>4 POOL2</td><td class="n">7×7×16</td><td class="n">0</td><td class="n">0</td><td>12×12</td></tr>
+  <tr><td>5 FLATTEN</td><td class="n">784</td><td class="n">0</td><td class="n">0</td><td>12×12</td></tr>
+  <tr><td>6 FC-10</td><td class="n">10</td><td class="n">784·10+10 = 7,850</td><td class="n">7,840</td><td>28×28 (whole image)</td></tr></table></div>
+  <div class="why"><b class="lab">Why</b>"Same" padding P = (F−1)/2. LRF with jump j: conv5 → r = 5 (j=1); pool → r = 5 + 1·1 = 6, j = 2; conv3 → r = 6 + 2·2 = 10; pool → r = 10 + 1·2 = 12, j = 4. The pooled LRF grows by one step of the current jump, it does not double. Note that the FC layer holds 88% of all parameters.</div></details>
+ <div class="part"><span class="pl">(b)</span>(2 marks) Replace FLATTEN + FC-10 with a single convolution layer. Give the filter size, number of filters, parameters and multiplications.</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <p><b>CONV7-10</b>: ten 7×7×16 filters, no padding. Parameters 10·(7·7·16+1) = 7,850; multiplications 1·1·10·784 = 7,840. Identical to the FC layer.</p>
+  <div class="why"><b class="lab">Why</b>Each FC neuron reads the whole 7×7×16 volume, which is exactly one filter covering it. Output is 1×1×10.</div></details>
+ <div class="part"><span class="pl">(c)</span>(4 marks) The converted network now receives a 60×60×1 image. Give the output size after layer 4 and of the final layer. How many 28×28 sliding windows does that equal, and at what stride?</div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <p>After layer 4: 60 → 60 → 30 → 30 → 15, so <b>15×15×16</b>. Final: (15 − 7) + 1 = 9, so <b>9×9×10</b>. That is <b>81 windows</b> of 28×28 at <b>stride 4</b>: (60 − 28)/4 + 1 = 9 per side.</p>
+  <div class="why"><b class="lab">Why</b>Stride = product of all strides (2 × 2 = 4). The convolutional version shares all overlapping computation, so 81 classifications cost far less than 81 separate forward passes.</div></details>
+ <div class="scorebox"><label for="sA2">Your marks</label><input id="sA2" type="number" min="0" max="16" inputmode="numeric"> / 16</div>
+</div>
+
+<!-- A3 -->
+<div class="qcard" data-max="14">
+ <h3 id="s3"><span class="num">03</span>Question 3 · Backpropagation by hand<span class="marks">14 marks</span></h3>
+ <p>f = σ(w₀x₀ + w₁x₁ + w₂), σ(s) = 1/(1 + e⁻ˢ). Values: w₀ = 2, x₀ = −1, w₁ = −3, x₁ = −2, w₂ = −3. Give answers to 4 decimal places.</p>
+ <div class="part"><span class="pl">(a)</span>(3 marks) Forward pass: compute s and f.</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="formula">s = 2·(−1) + (−3)·(−2) + (−3) = −2 + 6 − 3 = 1
+f = σ(1) = 1/(1 + e⁻¹) = 0.7311</div></details>
+ <div class="part"><span class="pl">(b)</span>(6 marks) Backward pass: compute ∂f/∂w₀, ∂f/∂x₀, ∂f/∂w₁, ∂f/∂x₁, ∂f/∂w₂.</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <div class="formula">∂f/∂s = σ(1)(1 − σ(1)) = 0.7311 × 0.2689 = 0.1966
+∂f/∂w₀ = x₀ · 0.1966 = −0.1966        ∂f/∂x₀ = w₀ · 0.1966 = 0.3932
+∂f/∂w₁ = x₁ · 0.1966 = −0.3932        ∂f/∂x₁ = w₁ · 0.1966 = −0.5898
+∂f/∂w₂ = 1 · 0.1966 = 0.1966</div>
+  <div class="why"><b class="lab">Why</b>Sigmoid gate: multiply the upstream gradient (1) by σ(1 − σ). Add gate: pass it unchanged to each term. Multiply gate: each input receives upstream × the <i>other</i> input.</div></details>
+ <div class="part"><span class="pl">(c)</span>(2 marks) A node "×2" is added after σ (output 2f). What is the new ∂(2f)/∂w₂?</div>
+ <details class="ans"><summary>Answer (c)</summary><p>The ×2 node doubles every upstream gradient: <b>0.3932</b>.</p></details>
+ <div class="part"><span class="pl">(d)</span>(3 marks) Suppose 10 such sigmoid units are chained, each at s = 1, with all weights equal to 1. By what factor is the gradient reaching the first layer scaled? What is the best case for sigmoid, and what does this tell you?</div>
+ <details class="ans"><summary>Answer (d)</summary>
+  <p>0.1966¹⁰ ≈ <b>8.6 × 10⁻⁸</b>. Best case: σ' ≤ 0.25, so at most 0.25¹⁰ ≈ 9.5 × 10⁻⁷.</p>
+  <div class="why"><b class="lab">Why</b>δ⁽ˡ⁾ = g'(s⁽ˡ⁾)·Σw·δ⁽ˡ⁺¹⁾ multiplies one g' per layer, so early layers receive almost no gradient: the <b>vanishing gradient problem</b>. Fixes: ReLU (g' = 1 for s &gt; 0), residual connections, batch normalisation, careful initialisation.</div></details>
+ <div class="scorebox"><label for="sA3">Your marks</label><input id="sA3" type="number" min="0" max="14" inputmode="numeric"> / 14</div>
+</div>
+
+<!-- A4 -->
+<div class="qcard" data-max="12">
+ <h3 id="s4"><span class="num">04</span>Question 4 · Training a network<span class="marks">12 marks</span></h3>
+ <div class="part"><span class="pl">(a)</span>(3 marks) Training log:</div>
+ <div class="given">Epoch       10    11    12    13    14    15
+Train err   14%   11%    9%    7%    5%    3%
+Valid err   16%   13%   12%   12.5% 14%   17%</div>
+ <p>At which epoch should training stop, why, and what is the problem after that point?</p>
+ <details class="ans"><summary>Answer (a)</summary>
+  <p>Stop at <b>epoch 12</b>, where validation error is lowest (12%). After that, training error keeps falling but validation error rises: the model is <b>overfitting</b> (memorising rather than generalising). This is early stopping at the "Goldilocks" point.</p></details>
+ <div class="part"><span class="pl">(b)</span>(3 marks) Weight w = 1. Gradients at the first two steps are g₁ = 2 and g₂ = 1. Using momentum with ρ = 0.9, α = 0.1, v₀ = 0, compute w after two steps. Compare with plain gradient descent.</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <div class="formula">v₁ = 0.9·0 − 0.1·2 = −0.2       w₁ = 1 − 0.2 = 0.8
+v₂ = 0.9·(−0.2) − 0.1·1 = −0.28  w₂ = 0.8 − 0.28 = 0.52
+Plain GD: 1 → 0.8 → 0.7</div>
+  <div class="why"><b class="lab">Why</b>Momentum keeps 90% of the previous step, so it moves further in a consistent direction (good for flat regions and escaping shallow minima) but can overshoot; Nesterov corrects this by evaluating the gradient at the look-ahead point.</div></details>
+ <div class="part"><span class="pl">(c)</span>(2 marks) What problem of AdaGrad does RMSProp fix, and how?</div>
+ <details class="ans"><summary>Answer (c)</summary><p>AdaGrad's G ← G + (∇J)² only grows, so the effective rate α/√G shrinks towards zero and learning stalls. RMSProp uses a decaying average G ← βG + (1−β)(∇J)², which forgets old gradients and keeps G bounded.</p></details>
+ <div class="part"><span class="pl">(d)</span>(2 marks) Why do we prefer zero-centred activation outputs?</div>
+ <details class="ans"><summary>Answer (d)</summary><p>The gradient for weight wᵢ is xᵢ·δ. If all inputs xᵢ are positive (e.g. sigmoid outputs), every weight's gradient has the same sign as δ, so the weights can only all increase or all decrease together. Reaching an optimum that needs some up and some down takes a zig-zag path, which slows convergence.</p></details>
+ <div class="part"><span class="pl">(e)</span>(2 marks) How does dropout behave differently at training and test time?</div>
+ <details class="ans"><summary>Answer (e)</summary><p>Training: each step randomly drops (zeroes) e.g. 50% of neurons so the network cannot rely on any single neuron. Testing: all neurons are used and activations are scaled (by the keep probability) so the expected output matches training.</p></details>
+ <div class="scorebox"><label for="sA4">Your marks</label><input id="sA4" type="number" min="0" max="12" inputmode="numeric"> / 12</div>
+</div>
+
+<!-- A5 -->
+<div class="qcard" data-max="18">
+ <h3 id="s5"><span class="num">05</span>Question 5 · Self-attention by hand<span class="marks">18 marks</span></h3>
+ <p>Sentence: "The cat drank the milk because it was sweet." Consider the single-head scaled dot-product attention for the query of <b>"it"</b> over the keys of "cat", "milk" and "it" (other words omitted). d_k = 4.</p>
+ <div class="given">          Query              Key                Value
+it        Q = [1, 0, 1, 1]   K = [0, 0, 1, 0]   V = [0.5, 0.5]
+cat                          K = [1, 0, 0, 0]   V = [1, 0]
+milk                         K = [1, 1, 1, 1]   V = [0, 1]</div>
+ <div class="part"><span class="pl">(a)</span>(4 marks) Compute the raw dot-product scores and the scaled scores.</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="formula">it·cat  = 1·1 + 0 + 1·0 + 1·0 = 1      scaled 1/√4 = 0.5
+it·milk = 1 + 0 + 1 + 1        = 3      scaled 1.5
+it·it   = 0 + 0 + 1 + 0        = 1      scaled 0.5</div></details>
+ <div class="part"><span class="pl">(b)</span>(5 marks) Apply softmax (give the formula) to get the attention weights.</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <div class="formula">αᵢ = e^(sᵢ) / Σⱼ e^(sⱼ)
+e^0.5 = 1.6487,  e^1.5 = 4.4817,  sum = 1.6487 + 4.4817 + 1.6487 = 7.7791
+α(cat) = 0.2119   α(milk) = 0.5761   α(it) = 0.2119       (sum = 1)</div></details>
+ <div class="part"><span class="pl">(c)</span>(4 marks) Compute the attention output for "it" and interpret it.</div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <div class="formula">0.2119·[1, 0] + 0.5761·[0, 1] + 0.2119·[0.5, 0.5] = [0.3179, 0.6821]</div>
+  <p>"It" now leans towards milk's value (second component 0.68). The model resolves "it" → "milk", which fits "sweet". In "…because it was hungry", a different query/key match would favour "cat".</p></details>
+ <div class="part"><span class="pl">(d)</span>(3 marks) Why divide by √d_k?</div>
+ <details class="ans"><summary>Answer (d)</summary><p>Dot products of d_k-dimensional vectors grow with d_k (variance ∝ d_k). Large scores push softmax towards a one-hot output where gradients are almost zero. Dividing by √d_k keeps the scores' spread roughly constant, so softmax stays soft and trainable.</p></details>
+ <div class="part"><span class="pl">(e)</span>(2 marks) In a decoder's masked self-attention with order (cat, milk, it), which keys can the query of "milk" attend to, and why?</div>
+ <details class="ans"><summary>Answer (e)</summary><p>Only "cat" and "milk". Future positions ("it") get score −∞ before softmax (weight 0), so during training the model can't peek at words it is supposed to predict.</p></details>
+ <div class="scorebox"><label for="sA5">Your marks</label><input id="sA5" type="number" min="0" max="18" inputmode="numeric"> / 18</div>
+</div>
+
+<!-- A6 -->
+<div class="qcard" data-max="14">
+ <h3 id="s6"><span class="num">06</span>Question 6 · Word embeddings and RNNs<span class="marks">14 marks</span></h3>
+ <p>CBOW model, vocabulary (I, love, deep, learning), embedding size k = 2. Context words: "I" and "deep" (m = 2).</p>
+ <div class="given">U (4×2, rows = word vectors)        U' (2×4)
+I         [1, 0]                    [0, 1, 1, −1]
+love      [0, 1]                    [1, 2, 0,  0]
+deep      [1, 1]
+learning  [2, 0]</div>
+ <div class="part"><span class="pl">(a)</span>(6 marks) Compute ṽ, the score vector, the softmax probabilities, the predicted word, and the cross-entropy loss if the true word is "love".</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="formula">ṽ = (u_I + u_deep)/2 = ([1,0] + [1,1])/2 = [1, 0.5]
+s = ṽ·U' = [1·0+0.5·1, 1·1+0.5·2, 1·1+0.5·0, 1·(−1)+0] = [0.5, 2, 1, −1]
+softmax: e^s = [1.649, 7.389, 2.718, 0.368], sum 12.124
+ŷ = [0.136, 0.609, 0.224, 0.030]   → predicted "love"
+loss = −ln 0.609 = 0.495</div>
+  <div class="why"><b class="lab">Why</b>CBOW averages the context word vectors (X·U/m), scores every vocabulary word with U', and trains with categorical cross-entropy against the one-hot centre word. After training, U's rows are the word embeddings.</div></details>
+ <div class="part"><span class="pl">(b)</span>(4 marks) Using "Deep learning models learn features directly from raw data", give one training example (input → target) for: next-word prediction, CBOW (window 2), skip-gram (window 2), BERT masked language modelling.</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <div class="tbl"><table><tr><th>Task</th><th>Input</th><th>Target</th></tr>
+  <tr><td>Next word</td><td>"Deep learning models learn"</td><td>"features"</td></tr>
+  <tr><td>CBOW</td><td>{models, learn, directly, from}</td><td>"features"</td></tr>
+  <tr><td>Skip-gram</td><td>"features"</td><td>models, learn, directly, from (4 pairs)</td></tr>
+  <tr><td>BERT MLM</td><td>"Deep learning [MASK] learn features directly from raw [MASK]"</td><td>models, data</td></tr></table></div></details>
+ <div class="part"><span class="pl">(c)</span>(2 marks) Name the three LSTM gates and what each does.</div>
+ <details class="ans"><summary>Answer (c)</summary><p><b>Forget gate</b> f_t: removes irrelevant parts of the old cell state. <b>Input gate</b> i_t: chooses which new candidate values (C̃_t) to write. <b>Output gate</b> o_t: chooses which parts of the state to output (y_t = o_t ∗ tanh s_t).</p></details>
+ <div class="part"><span class="pl">(d)</span>(2 marks) How does ELMo's embedding of "play" differ from Word2Vec's?</div>
+ <details class="ans"><summary>Answer (d)</summary><p>Word2Vec gives "play" one fixed vector for every sentence. ELMo computes it at run time from a 2-layer bidirectional LSTM, so "a play by Shakespeare" and "kids play outside" give different, context-sensitive vectors.</p></details>
+ <div class="scorebox"><label for="sA6">Your marks</label><input id="sA6" type="number" min="0" max="14" inputmode="numeric"> / 14</div>
+</div>
+
+<!-- A7 -->
+<div class="qcard" data-max="14">
+ <h3 id="s7"><span class="num">07</span>Question 7 · Vision applications and adversarial images<span class="marks">14 marks</span></h3>
+ <div class="part"><span class="pl">(a)</span>(4 marks) Box A has corners (0,0) and (4,4); box B has corners (2,2) and (6,6). Compute IoU. With NMS threshold 0.5, are both boxes kept?</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="formula">intersection = (2,2)–(4,4) = 2×2 = 4
+union = 16 + 16 − 4 = 28
+IoU = 4/28 = 0.143</div>
+  <p>0.143 &lt; 0.5, so NMS does <b>not</b> suppress either; both boxes are kept (they are likely different objects).</p></details>
+ <div class="part"><span class="pl">(b)</span>(2 marks) YOLO with a 7×7 grid, 2 boxes per cell and 20 classes. What is the output tensor size?</div>
+ <details class="ans"><summary>Answer (b)</summary><p>S × S × (5B + C) = 7 × 7 × (10 + 20) = <b>7 × 7 × 30</b>. Each box has x, y, w, h, confidence.</p></details>
+ <div class="part"><span class="pl">(c)</span>(3 marks) Apply FGSM with ε = 0.1 to pixels x = [0.2, 0.5, 0.9] whose loss gradient is ∇ₓJ = [−0.3, 0.8, 0]. Why does FGSM use the gradient sign?</div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <div class="formula">sign(∇ₓJ) = [−1, 1, 0]
+x_adv = x + 0.1·[−1, 1, 0] = [0.1, 0.6, 0.9]</div>
+  <p>Gradient <b>ascent</b> on the loss of the true label. The sign gives the maximum loss increase for a fixed per-pixel budget ε, so every pixel moves by at most ε and the change stays invisible.</p></details>
+ <div class="part"><span class="pl">(d)</span>(3 marks) Explain occlusion sensitivity and what a dark region in its heat map means.</div>
+ <details class="ans"><summary>Answer (d)</summary><p>Slide a grey mask over the image; at each position record the classifier's probability for the correct class. Plot that probability per location. A dark region (low probability when masked) marks pixels the model depends on. If masking the object barely changes the prediction, the model is using context (e.g. background) rather than the object.</p></details>
+ <div class="part"><span class="pl">(e)</span>(2 marks) Does adversarial training solve the adversarial problem?</div>
+ <details class="ans"><summary>Answer (e)</summary><p>No. Adding adversarial images (labelled correctly) improves robustness to the attack used to generate them, but often not to other attacks. The problem is not solved, and adversarial examples also transfer across model types.</p></details>
+ <div class="scorebox"><label for="sA7">Your marks</label><input id="sA7" type="number" min="0" max="14" inputmode="numeric"> / 14</div>
+</div>
+<p style="text-align:center;color:var(--muted);font-family:var(--f-mono);font-size:12px">END OF PAPER A</p>
+</section>
+
+<section id="paperB" class="paper" hidden>
+<div class="paperhead">
+ <h2>Paper B<span class="zh">試卷 B：架構、GAN、LLM 與設計題</span></h2>
+ <div class="meta">7 questions · 100 marks · 2 hours · answer all questions</div>
+</div>
+
+<!-- B1 -->
+<div class="qcard" data-max="14">
+ <h3 id="s8"><span class="num">08</span>Question 1 · Famous CNN architectures<span class="marks">14 marks</span></h3>
+ <div class="part"><span class="pl">(a)</span>(4 marks) VGG replaces one 7×7 conv layer by three stacked 3×3 conv layers (stride 1). Show they have the same receptive field, and compare parameter counts when input and output both have C = 256 channels (ignore biases).</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <p>Receptive field: 3 → 3 + 2 = 5 → 5 + 2 = 7, the same as one 7×7.</p>
+  <div class="formula">three 3×3 layers: 3 × (3·3·256·256) = 27C² = 1,769,472
+one 7×7 layer:        7·7·256·256 = 49C² = 3,211,264        (45% fewer with 3×3)</div>
+  <div class="why"><b class="lab">Why</b>Fewer parameters and three non-linearities (ReLU after each) instead of one, so the stack is both cheaper and more expressive.</div></details>
+ <div class="part"><span class="pl">(b)</span>(5 marks) Input 32×32×256. Count multiplications for (i) a 5×5 "same" conv to 32×32×64, and (ii) a 1×1 conv to 32×32×32 followed by the 5×5 conv to 32×32×64. What is the saving and what is the technique called?</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <div class="formula">(i)  32·32·64 × 5·5·256 = 419,430,400
+(ii) 1×1:  32·32·32 × 1·1·256 =   8,388,608
+     5×5:  32·32·64 × 5·5·32  =  52,428,800
+     total                     =  60,817,408
+saving = 358,612,992  ≈ 85.5%</div>
+  <p>Technique: <b>1×1 convolution bottleneck</b> (GoogLeNet's Inception, also ResNet's bottleneck block).</p></details>
+ <div class="part"><span class="pl">(c)</span>(3 marks) Why did plain networks deeper than ~20 layers perform worse, and how does ResNet fix it?</div>
+ <details class="ans"><summary>Answer (c)</summary><p>In theory, extra layers could learn the identity and do no harm, but in practice deeper plain nets had higher <i>training</i> error (degradation), because learning an exact identity through non-linear layers is hard and gradients vanish. ResNet adds skip connections so a block outputs F(x) + x; it only has to learn the residual F(x) = H(x) − x, and F = 0 (do nothing) is easy. The identity path also carries gradients straight back, so 152-layer nets train.</p></details>
+ <div class="part"><span class="pl">(d)</span>(2 marks) Name two things GoogLeNet did instead of large fully connected layers or to help training.</div>
+ <details class="ans"><summary>Answer (d)</summary><p>Global average pooling instead of FC layers (fewer parameters, less overfitting); auxiliary classifiers in the middle of the network to inject gradient; 1×1 bottlenecks to keep 22 layers cheap (~4M params).</p></details>
+ <div class="scorebox"><label for="sB1">Your marks</label><input id="sB1" type="number" min="0" max="14" inputmode="numeric"> / 14</div>
+</div>
+
+<!-- B2 -->
+<div class="qcard" data-max="14">
+ <h3 id="s9"><span class="num">09</span>Question 2 · Sliding windows as convolution<span class="marks">14 marks</span></h3>
+ <p>A classifier for 14×14×3 crops (pedestrian, car, motorcycle, background):</p>
+ <div class="given">14×14×3 → CONV 5×5, 16 filters, P=0, S=1 → MAXPOOL 2×2, S=2 → FC-400 → FC-400 → FC-4 (softmax)</div>
+ <div class="part"><span class="pl">(a)</span>(4 marks) Give the size after each layer, then rewrite every FC layer as a convolution (filter size and count).</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="formula">CONV: (14 − 5)/1 + 1 = 10  → 10×10×16
+POOL: 10/2 = 5            → 5×5×16
+FC-400 → 400 filters of 5×5×16   → 1×1×400
+FC-400 → 400 filters of 1×1×400  → 1×1×400
+FC-4   →   4 filters of 1×1×400  → 1×1×4</div></details>
+ <div class="part"><span class="pl">(b)</span>(3 marks) Parameters of the three converted layers.</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <div class="formula">400·(5·5·16 + 1) = 160,400
+400·(400 + 1)    = 160,400
+4·(400 + 1)      =   1,604</div>
+  <p>Identical to the FC version: conversion changes how the weights are applied, not how many there are.</p></details>
+ <div class="part"><span class="pl">(c)</span>(4 marks) The converted network is run on a 28×28×3 image. Give the output size, the number of windows, their size and stride.</div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <p>28 → 24 → 12 → (12 − 5) + 1 = 8 → 8 → 8, so <b>8×8×4</b>. That equals <b>64 windows of 14×14 at stride 2</b>: (28 − 14)/2 + 1 = 8.</p></details>
+ <div class="part"><span class="pl">(d)</span>(3 marks) Compare the first-layer multiplications for running 64 separate crops versus one convolutional pass.</div>
+ <details class="ans"><summary>Answer (d)</summary>
+  <div class="formula">one crop: 10·10·16 × 5·5·3 = 120,000     × 64 crops = 7,680,000
+one pass: 24·24·16 × 75    = 691,200                  (about 11× cheaper)</div>
+  <div class="why"><b class="lab">Why</b>Neighbouring windows overlap heavily; the convolutional version computes each overlapping patch once and shares it.</div></details>
+ <div class="scorebox"><label for="sB2">Your marks</label><input id="sB2" type="number" min="0" max="14" inputmode="numeric"> / 14</div>
+</div>
+
+<!-- B3 -->
+<div class="qcard" data-max="18">
+ <h3 id="s10"><span class="num">10</span>Question 3 · Generative adversarial networks<span class="marks">18 marks</span></h3>
+ <div class="part"><span class="pl">(a)</span>(6 marks) Name the two components of a GAN, with their function, input and output.</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="tbl"><table><tr><th>Name</th><th>Function</th><th>Input</th><th>Output</th></tr>
+  <tr><td>Generator G</td><td>Produce realistic fake samples that fool D</td><td>Random noise vector z (and a class label in a conditional GAN)</td><td>Synthetic sample (e.g. image)</td></tr>
+  <tr><td>Discriminator D</td><td>Binary classifier: real vs generated</td><td>Real or generated sample</td><td>Probability the sample is real, in [0,1]</td></tr></table></div></details>
+ <div class="part"><span class="pl">(b)</span>(4 marks) A <b>real</b> image is fed to D, which outputs 0.8. Which network is trained, with what target and loss value?</div>
+ <details class="ans"><summary>Answer (b)</summary><p>Only <b>D</b> is updated (G did not produce this sample). Target 1, binary cross-entropy loss = −ln 0.8 = <b>0.223</b>. Backprop adjusts D's weights to push the output towards 1.</p></details>
+ <div class="part"><span class="pl">(c)</span>(4 marks) A <b>generated</b> image gets D output 0.3. Describe the D step and the G step, with loss values.</div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <div class="formula">D step: target 0, loss = −ln(1 − 0.3) = 0.357 → update D towards 0
+G step: freeze D, target 1, loss = −ln(0.3) = 1.204 → gradient flows back
+        through D into G; update only G so D's score on fakes rises</div>
+  <div class="why"><b class="lab">Why</b>G's loss is large because D is currently winning on this sample; G gets a strong signal. Training alternates these steps.</div></details>
+ <div class="part"><span class="pl">(d)</span>(4 marks) Give three challenges in training GANs and explain mode collapse.</div>
+ <details class="ans"><summary>Answer (d)</summary><p><b>Mode collapse</b>: G finds a few outputs that fool D and keeps producing them, ignoring the variety in z, so samples lack diversity. Others: non-convergence/oscillation (the two players chase each other); vanishing gradient for G when D becomes too strong; difficulty balancing D and G; no single reliable quality metric; sensitive hyper-parameters.</p></details>
+ <div class="scorebox"><label for="sB3">Your marks</label><input id="sB3" type="number" min="0" max="18" inputmode="numeric"> / 18</div>
+</div>
+
+<!-- B4 -->
+<div class="qcard" data-max="14">
+ <h3 id="s11"><span class="num">11</span>Question 4 · LLM size, quantisation and LoRA<span class="marks">14 marks</span></h3>
+ <p>Parameters ≈ 2VE + L(4E² + 3EH + 2E), with V = 32,000, L = 32, E = 4,096, H = 11,008.</p>
+ <div class="part"><span class="pl">(a)</span>(4 marks) Compute the total, and say which part contributes most.</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="formula">2VE      = 0.262 B
+L·4E²    = 2.147 B   (attention)
+L·3EH    = 4.329 B   (MLP)          ← largest
+L·2E     ≈ 0.000 3 B
+total    ≈ 6.74 B</div></details>
+ <div class="part"><span class="pl">(b)</span>(3 marks) Halving L to 16 gives how many parameters? Why is it not exactly half?</div>
+ <details class="ans"><summary>Answer (b)</summary><p>2VE + 16(…) ≈ <b>3.50 B</b> (52% of the original). The embedding term 2VE does not depend on L, so it doesn't halve.</p></details>
+ <div class="part"><span class="pl">(c)</span>(3 marks) Memory to store the 6.74 B weights at 16-bit and 4-bit. Which of 8 GB / 16 GB / 24 GB GPUs is the smallest that fits each?</div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <div class="formula">16-bit: 6.74 B × 2 bytes   = 13.5 GB  → 16 GB GPU
+ 4-bit: 6.74 B × 0.5 bytes = 3.4 GB   → 8 GB GPU</div>
+  <p>Weights only; activations and KV-cache need more in practice.</p></details>
+ <div class="part"><span class="pl">(d)</span>(4 marks) LoRA on the four E×E attention matrices with ΔW = AB, A: E×r, B: r×E. Largest r giving at least a 1000× reduction? Repeat for two E×H MLP matrices.</div>
+ <details class="ans"><summary>Answer (d)</summary>
+  <div class="formula">Attention: 4E² / (4·2Er) = E/(2r) ≥ 1000 → r ≤ 4096/2000 = 2.048 → r = 2
+MLP:       2EH / (2r(E+H)) ≥ 1000 → r ≤ 4096·11008 / (1000·15104) = 2.985 → r = 2</div>
+  <div class="why"><b class="lab">Why</b>Round down: r = 3 in the MLP case gives only a 995× reduction. Show the calculation; marks are for the chain of reasoning.</div></details>
+ <div class="scorebox"><label for="sB4">Your marks</label><input id="sB4" type="number" min="0" max="14" inputmode="numeric"> / 14</div>
+</div>
+
+<!-- B5 -->
+<div class="qcard" data-max="14">
+ <h3 id="s12"><span class="num">12</span>Question 5 · BERT, hallucination and prompting<span class="marks">14 marks</span></h3>
+ <div class="part"><span class="pl">(a)</span>(4 marks) Explain how masking is used in (i) the transformer decoder and (ii) BERT pre-training.</div>
+ <details class="ans"><summary>Answer (a)</summary><p>(i) Look-ahead (causal) mask: scores for future positions are set to −∞ before softmax, so position i attends only to positions ≤ i. This lets teacher-forced training process all positions in parallel without cheating. (ii) BERT selects 15% of input tokens (80% → [MASK], 10% random, 10% unchanged) and predicts the originals using context from both sides. That is a training task, not an attention mask, and is why BERT is bidirectional.</p></details>
+ <div class="part"><span class="pl">(b)</span>(4 marks) Why do LLMs hallucinate when the next word is sampled from the predicted distribution? Give two practical remedies.</div>
+ <details class="ans"><summary>Answer (b)</summary><p>The model is trained to produce a <i>plausible</i> continuation, not a verified one. Sampling sometimes picks a fluent but wrong token, and later tokens are conditioned on it, so the error snowballs. Gaps and errors in training data, and a habit of always answering, add to it. Remedies: retrieval-augmented generation (ground answers in retrieved documents, cite sources); lower temperature / greedy decoding; fine-tuning or RLHF that rewards saying "I don't know"; self-verification prompts.</p></details>
+ <div class="part"><span class="pl">(c)</span>(6 marks) Check this prompt against COSTAR and rewrite it: <i>"Summarise this research paper for my manager."</i></div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <div class="tbl"><table><tr><th></th><th>Present?</th><th>Fix</th></tr>
+  <tr><td>Context</td><td>✗</td><td>"I'm a data scientist; my manager decides whether to fund a pilot."</td></tr>
+  <tr><td>Objective</td><td>partly</td><td>"Summarise the paper's method, results and limits so she can decide."</td></tr>
+  <tr><td>Style</td><td>✗</td><td>"Plain business language, no equations."</td></tr>
+  <tr><td>Tone</td><td>✗</td><td>"Neutral and confident."</td></tr>
+  <tr><td>Audience</td><td>✓ (manager)</td><td>"A non-technical manager."</td></tr>
+  <tr><td>Response</td><td>✗</td><td>"Five bullet points under 150 words, then a one-line recommendation."</td></tr></table></div></details>
+ <div class="scorebox"><label for="sB5">Your marks</label><input id="sB5" type="number" min="0" max="14" inputmode="numeric"> / 14</div>
+</div>
+
+<!-- B6 -->
+<div class="qcard" data-max="16">
+ <h3 id="s13"><span class="num">13</span>Question 6 · Design the weights<span class="marks">16 marks</span></h3>
+ <p>(C-section style.) Identity activations unless stated.</p>
+ <div class="part"><span class="pl">(a)</span>(6 marks) An RNN with state sₜ = W xₜ + U sₜ₋₁ + b, s₀ = 0, xₜ ∈ ℝ, should output the running mean of x₁…xₜ. Use a 2-dimensional state sₜ = (Sₜ, cₜ). Give W, U, b, and the output function.</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="formula">Sₜ = xₜ + Sₜ₋₁ ,   cₜ = cₜ₋₁ + 1  (= t)
+W = [1; 0]  (2×1)     U = [[1,0],[0,1]]  (2×2)     b = [0; 1]
+output yₜ = Sₜ / cₜ</div></details>
+ <div class="part"><span class="pl">(b)</span>(4 marks) Now xₜ ∈ {−1, 1} and you want the running variance, using sₜ = (Sₜ, Qₜ, cₜ) with Qₜ = Σx². Give W, U, b and the output.</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <div class="formula">x² = 1 always, so Qₜ = Qₜ₋₁ + 1 (a counter)
+W = [1; 0; 0]    U = I₃    b = [0; 1; 1]
+rₜ = Qₜ/cₜ − (Sₜ/cₜ)² = 1 − (Sₜ/t)²</div>
+  <div class="why"><b class="lab">Why</b>Same trick as Dec 2025 C Q3: when x takes only two values, x² is a straight line in x (here a constant), so it can be accumulated linearly.</div></details>
+ <div class="part"><span class="pl">(c)</span>(6 marks) Inputs are 4×4 binary images containing exactly one full horizontal line (class 0) or one full vertical line (class 1). The CNN: one 2×1 filter (2 rows, 1 column, entries in {0,1}), stride 1, no padding, no bias → global max pooling → output 1 if value ≥ t. Give the feature-map size, all valid filters, and t.</div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <p>Feature map: (4 − 2 + 1) × (4 − 1 + 1) = <b>3×4</b>. Only filter <b>[1; 1]</b> works: a vertical line puts 1s in both cells of some window → 2; a horizontal line can only fill one of the two rows → max 1. So any <b>t ∈ (1, 2]</b>, e.g. t = 1.5 (or t = 2).</p>
+  <div class="why"><b class="lab">Why others fail</b>[1;0] and [0;1] give max 1 for both classes; [0;0] gives 0 for both.</div></details>
+ <div class="scorebox"><label for="sB6">Your marks</label><input id="sB6" type="number" min="0" max="16" inputmode="numeric"> / 16</div>
+</div>
+
+<!-- B7 -->
+<div class="qcard" data-max="10">
+ <h3 id="s14"><span class="num">14</span>Question 7 · Which statements are correct?<span class="marks">10 marks</span></h3>
+ <p>List all correct statements in each group (2 marks each).</p>
+ <div class="part"><span class="pl">(a)</span>1. ReLU never has a zero gradient. 2. tanh is zero-centred. 3. Sigmoid's derivative is at most 0.25.</div>
+ <details class="ans"><summary>Answer (a)</summary><p><b>2, 3</b>. ReLU's gradient is 0 for negative inputs (dying ReLU).</p></details>
+ <div class="part"><span class="pl">(b)</span>1. Pooling layers have learnable parameters. 2. Parameter sharing lets a CNN detect the same pattern anywhere. 3. A 2×2 pool after a 3×3 conv doubles the receptive field to 6×6.</div>
+ <details class="ans"><summary>Answer (b)</summary><p><b>2</b>. Pooling has no parameters; the LRF becomes 4×4, not 6×6.</p></details>
+ <div class="part"><span class="pl">(c)</span>1. Teacher forcing feeds the model's own previous prediction during training. 2. Transformers process all tokens of a sequence in parallel during training. 3. Positional encoding is needed because self-attention ignores order.</div>
+ <details class="ans"><summary>Answer (c)</summary><p><b>2, 3</b>. Teacher forcing feeds the <i>correct</i> previous word.</p></details>
+ <div class="part"><span class="pl">(d)</span>1. Backpropagation computes gradients; the weight update is a separate step. 2. Mini-batch SGD gives a noisier gradient than single-example SGD. 3. Early stopping uses the test set to choose the epoch.</div>
+ <details class="ans"><summary>Answer (d)</summary><p><b>1</b>. Mini-batches are <i>less</i> noisy; early stopping uses the validation set (the test set is used once, at the end, to avoid a biased estimate).</p></details>
+ <div class="part"><span class="pl">(e)</span>1. FGSM needs the model's gradients (white-box). 2. Adversarial examples only affect neural networks. 3. YOLO is a two-stage detector.</div>
+ <details class="ans"><summary>Answer (e)</summary><p><b>1</b>. SVMs, decision trees, k-NN are fooled too; YOLO is single-shot (Faster R-CNN is two-stage).</p></details>
+ <div class="scorebox"><label for="sB7">Your marks</label><input id="sB7" type="number" min="0" max="10" inputmode="numeric"> / 10</div>
+</div>
+<p style="text-align:center;color:var(--muted);font-family:var(--f-mono);font-size:12px">END OF PAPER B</p>
+</section>
+
+
+<section id="paperC" class="paper" hidden>
+<div class="paperhead">
+ <h2>Paper C<span class="zh">試卷 C：講義 6–7（Transformer、BERT、模型大小、LLM、GPT）</span></h2>
+ <div class="meta">7 questions · 100 marks · 2 hours · answer all questions · focuses on lectures 6–7</div>
+</div>
+
+<!-- C1 -->
+<div class="qcard" data-max="18">
+ <h3 id="s15"><span class="num">15</span>Question 1 · Self-attention with a mask<span class="marks">18 marks</span></h3>
+ <p>A single attention head processes "I love AI". Embeddings (E = 3), W_Q = W_K = I₃ (identity), and W_V (3×2) are:</p>
+ <div class="given">X:  I     [1, 0, 1]          W_V = [[1, 0],
+    love  [0, 1, 1]                 [0, 1],
+    AI    [1, 1, 0]                 [1, 1]]</div>
+ <div class="part"><span class="pl">(a)</span>(3 marks) Compute Q, K and V.</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="formula">Q = K = X (identity weights)
+V = X·W_V:  I    [1·1+1·1, 0+1·1] = [2, 1]
+            love [0+1, 1+1]       = [1, 2]
+            AI   [1, 1]           = [1, 1]</div></details>
+ <div class="part"><span class="pl">(b)</span>(4 marks) Compute QKᵀ and the scaled scores (d_k = 3).</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <div class="formula">QKᵀ = [[2,1,1],
+       [1,2,1],
+       [1,1,2]]
+÷ √3:  diagonal 2/√3 = 1.1547, off-diagonal 1/√3 = 0.5774</div></details>
+ <div class="part"><span class="pl">(c)</span>(5 marks) Without a mask, give the attention matrix and the output for "I".</div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <div class="formula">Each row: e^1.1547 = 3.173, e^0.5774 = 1.781, sum = 3.173 + 2(1.781) = 6.735
+row = [0.471, 0.264, 0.264] (diagonal 0.471)
+z_I = 0.471·[2,1] + 0.264·[1,2] + 0.264·[1,1] = [1.471, 1.264]</div>
+  <div class="why"><b class="lab">Why</b>Each token's query best matches its own key (score 2), so each pays 47% attention to itself and 26% to each neighbour.</div></details>
+ <div class="part"><span class="pl">(d)</span>(4 marks) Now apply a decoder look-ahead mask. Give the masked attention matrix and the outputs. Which row is unchanged and why?</div>
+ <details class="ans"><summary>Answer (d)</summary>
+  <div class="formula">Add −∞ above the diagonal before softmax:
+I     [1,      0,      0     ]   z = [2, 1]
+love  [0.360,  0.640,  0     ]   z = 0.360·[2,1] + 0.640·[1,2] = [1.360, 1.640]
+AI    [0.264,  0.264,  0.471 ]   z = [1.264, 1.264]   (unchanged)</div>
+  <p>"love": e^0.5774 = 1.781, e^1.1547 = 3.173 → 1.781/4.954 = 0.360. The last token "AI" already only had past tokens to its left, so the mask removes nothing from its row.</p></details>
+ <div class="part"><span class="pl">(e)</span>(2 marks) A model has E = 1024 and 16 heads. What is the query size per head, and the size of each head's attention matrix for a 50-token input?</div>
+ <details class="ans"><summary>Answer (e)</summary><p>d = E / heads = 1024 / 16 = <b>64</b>. Each head's attention matrix is N × N = <b>50 × 50</b>.</p></details>
+ <div class="scorebox"><label for="sC1">Your marks</label><input id="sC1" type="number" min="0" max="18" inputmode="numeric"> / 18</div>
+</div>
+
+<!-- C2 -->
+<div class="qcard" data-max="16">
+ <h3 id="s16"><span class="num">16</span>Question 2 · BERT<span class="marks">16 marks</span></h3>
+ <p>Text: <i>"Octopuses have three hearts. Two pump blood to the gills, while one pumps it to the rest of the body."</i></p>
+ <div class="part"><span class="pl">(a)</span>(4 marks) Give one BERT pre-training example for masked LM and one for NSP (positive and negative), showing [CLS], [SEP] and [MASK].</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="tbl"><table><tr><th>Task</th><th>Input</th><th>Target</th></tr>
+  <tr><td>Masked LM (15%)</td><td>[CLS] Octopuses have three [MASK] . Two pump [MASK] to the gills … [SEP]</td><td>hearts, blood</td></tr>
+  <tr><td>NSP positive</td><td>[CLS] Octopuses have three hearts . [SEP] Two pump blood to the gills , while one pumps it to the rest of the body . [SEP]</td><td>IsNext</td></tr>
+  <tr><td>NSP negative</td><td>[CLS] Octopuses have three hearts . [SEP] The stock market closed higher today . [SEP]</td><td>NotNext (random sentence, 50% of pairs)</td></tr></table></div></details>
+ <div class="part"><span class="pl">(b)</span>(3 marks) Name the three embeddings summed to form BERT's input, and what each encodes.</div>
+ <details class="ans"><summary>Answer (b)</summary><p><b>Token</b> embedding (vocabulary ID of each WordPiece token), <b>sentence/segment</b> embedding (0s for sentence A, 1s for sentence B), <b>position</b> embedding (each token's position in the sequence).</p></details>
+ <div class="part"><span class="pl">(c)</span>(4 marks) BERT for QA. Paragraph token outputs T₁…T₄ (H = 2) and learned vectors S, E:</div>
+ <div class="given">T₁ = [1, 0]   T₂ = [2, 1]   T₃ = [0, 1]   T₄ = [0, 0]
+S = [1, 0]    E = [−1, 2]</div>
+ <p>Compute the start and end probabilities and the predicted answer span.</p>
+ <details class="ans"><summary>Answer (c)</summary>
+  <div class="formula">S·Tᵢ = [1, 2, 0, 0]   → softmax = [0.225, 0.610, 0.083, 0.083]   start = T₂
+E·Tᵢ = [−1, 0, 2, 0]  → softmax = [0.038, 0.103, 0.757, 0.103]   end   = T₃
+Answer span = tokens 2–3</div>
+  <div class="why"><b class="lab">Why</b>S and E are the only new parameters for QA. The end must not come before the start; here it doesn't.</div></details>
+ <div class="part"><span class="pl">(d)</span>(2 marks) A sentiment classifier with K = 3 labels is put on BERT-base (H = 768). How many new parameters, and which token's hidden state is used?</div>
+ <details class="ans"><summary>Answer (d)</summary><p>K × H weights + K biases = 3 × 768 + 3 = <b>2,307</b>, applied to the hidden state of <b>[CLS]</b>, followed by softmax.</p></details>
+ <div class="part"><span class="pl">(e)</span>(3 marks) Vocabulary: {un, ##believ, ##able, ##ably, ##ab, ##ly, believe, ##e, …single characters}. Tokenize "unbelievably" with WordPiece and explain the rule.</div>
+ <details class="ans"><summary>Answer (e)</summary><p>Not a whole word → take the longest matching piece from the left each time: <span class="tok">un</span><span class="tok sub">##believ</span><span class="tok sub">##ably</span>. (##ably is the longest piece that matches "ably".) Unknown remainders would fall back to single characters, so any word can be encoded, and the vocabulary stays small (~30,000).</p></details>
+ <div class="scorebox"><label for="sC2">Your marks</label><input id="sC2" type="number" min="0" max="16" inputmode="numeric"> / 16</div>
+</div>
+
+<!-- C3 -->
+<div class="qcard" data-max="14">
+ <h3 id="s17"><span class="num">17</span>Question 3 · Counting parameters<span class="marks">14 marks</span></h3>
+ <div class="part"><span class="pl">(a)</span>(4 marks) Give the exact and approximate parameter counts of multi-head attention, the feed-forward network and layer normalisation, in terms of E and H. Hence give the approximate size of an encoder layer and a decoder layer.</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="formula">attention   4E² + 4E   ≈ 4E²
+FFN         2EH + E + H ≈ 2EH
+layer norm  2E          ≈ 0
+encoder layer ≈ 4E² + 2EH      (exact 4E² + 2EH + 9E + H)
+decoder layer ≈ 8E² + 2EH      (exact 8E² + 2EH + 15E + H; two attentions, three norms)</div></details>
+ <div class="part"><span class="pl">(b)</span>(4 marks) The original transformer has E = 512, H = 2048, 6 encoder and 6 decoder layers. Using the exact formulas, how many parameters are in the encoder and decoder stacks (ignore embeddings)?</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <div class="formula">encoder layer = 4·512² + 2·512·2048 + 9·512 + 2048 = 3,152,384
+decoder layer = 8·512² + 2·512·2048 + 15·512 + 2048 = 4,204,032
+6 × 3,152,384 + 6 × 4,204,032 = 44,138,496  (≈ 44 M)</div></details>
+ <div class="part"><span class="pl">(c)</span>(6 marks) GPT-2 medium: E = 1024, H = 4096, V = 50,257, N = 1024, L = 24, output layer tied to the embedding. Using the lecture's GPT-2 table, compute the total. Which part is largest?</div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <div class="formula">Embedding VE + NE = 50,257·1024 + 1024·1024        =  52,511,744
+Per block = 2E + (4E²+4E) + 2E + (2EH+E+H)          =  12,596,224
+   (attention 4,198,400 · MLP 8,393,728 · norms 4,096)
+× 24 blocks                                          = 302,309,376
+Final layer norm 2E                                  =       2,048
+TOTAL                                                = 354,823,168  (≈ 355 M)</div>
+  <p>The 24 transformer blocks hold 85%, and within each block the MLP (2EH) is about twice the attention (4E²) because H = 4E.</p></details>
+ <div class="scorebox"><label for="sC3">Your marks</label><input id="sC3" type="number" min="0" max="14" inputmode="numeric"> / 14</div>
+</div>
+
+<!-- C4 -->
+<div class="qcard" data-max="16">
+ <h3 id="s18"><span class="num">18</span>Question 4 · Decoding strategies<span class="marks">16 marks</span></h3>
+ <p>A decoder's next-word probabilities:</p>
+ <div class="given">Step 1:            A 0.5    B 0.4    C 0.1
+Step 2 after A:    x 0.3    y 0.3    z 0.4
+Step 2 after B:    x 0.9    y 0.1
+Step 3:            P(&lt;eos&gt; | A z) = 0.5     P(&lt;eos&gt; | B x) = 0.6</div>
+ <div class="part"><span class="pl">(a)</span>(4 marks) Which sentence does greedy search produce and with what probability? Which does beam search with k = 2 produce?</div>
+ <details class="ans"><summary>Answer (a)</summary>
+  <div class="formula">Greedy: A (0.5) → z (0.4) → &lt;eos&gt;:  0.5 × 0.4 × 0.5 = 0.10
+Beam k=2: step 1 keep A 0.5, B 0.4
+          step 2: Az 0.20, Ax 0.15, Ay 0.15, Bx 0.36, By 0.04 → keep Bx 0.36, Az 0.20
+          step 3: Bx&lt;eos&gt; = 0.216,  Az&lt;eos&gt; = 0.10   → "B x" (0.216)</div>
+  <div class="why"><b class="lab">Why</b>Greedy commits to the best first word, but the best sentence starts with the second-best word. Beam search keeps alternatives alive.</div></details>
+ <div class="part"><span class="pl">(b)</span>(5 marks) "The cat sat on the ___": mat 0.40, couch 0.25, floor 0.15, rug 0.10, bed 0.06, moon 0.04. Which words can be sampled under (i) top-k with k = 3, (ii) top-p with p = 0.75, (iii) ε-sampling with ε = 0.05? Give the renormalised probabilities for (i).</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <div class="formula">(i)   top-3: mat, couch, floor → 0.40/0.80 = 0.500, 0.3125, 0.1875
+(ii)  cumulative 0.40, 0.65, 0.80 → first exceeds 0.75 at 3 words: mat, couch, floor
+(iii) ε = 0.05 drops only moon (0.04): mat, couch, floor, rug, bed</div></details>
+ <div class="part"><span class="pl">(c)</span>(4 marks) Logits z = [2, 1, 0]. Give the softmax probabilities at T = 0.5 and T = 2. What happens as T → 0 and as T grows?</div>
+ <details class="ans"><summary>Answer (c)</summary>
+  <div class="formula">T = 0.5: z/T = [4, 2, 0] → [0.867, 0.117, 0.016]
+T = 1:   [0.665, 0.245, 0.090]
+T = 2:   z/T = [1, 0.5, 0] → [0.507, 0.307, 0.186]</div>
+  <p>T → 0 approaches greedy (all mass on the top word): repetitive, low variety. Large T flattens towards uniform: diverse but can become unrealistic or incoherent.</p></details>
+ <div class="part"><span class="pl">(d)</span>(3 marks) Why can sampling from the full distribution cause hallucinations, and how do top-k/top-p help?</div>
+ <details class="ans"><summary>Answer (d)</summary><p>The long tail: each unlikely word has a tiny probability, but there are thousands, so together they get real probability mass and a wrong word is sometimes drawn. Later words build on it. Top-k/top-p cut off the tail so only plausible words can be sampled, keeping some randomness for diversity.</p></details>
+ <div class="scorebox"><label for="sC4">Your marks</label><input id="sC4" type="number" min="0" max="16" inputmode="numeric"> / 16</div>
+</div>
+
+<!-- C5 -->
+<div class="qcard" data-max="10">
+ <h3 id="s19"><span class="num">19</span>Question 5 · Language models and perplexity<span class="marks">10 marks</span></h3>
+ <div class="part"><span class="pl">(a)</span>(2 marks) Write P(w₁w₂w₃w₄) with the chain rule as a language model computes it.</div>
+ <details class="ans"><summary>Answer (a)</summary><p>P(w₁)·P(w₂|w₁)·P(w₃|w₁w₂)·P(w₄|w₁w₂w₃).</p></details>
+ <div class="part"><span class="pl">(b)</span>(6 marks) Sentence S₁ has word probabilities 0.5, 0.25, 0.2, 0.4. Sentence S₂ has 0.5, 0.25, 0.2, 0.4, 0.1. Compute p, p_norm and perplexity for each. Which does the model prefer?</div>
+ <details class="ans"><summary>Answer (b)</summary>
+  <div class="formula">S₁: p = 0.01,   p_norm = 0.01^(1/4)  = 0.316,  PPL = 3.16
+S₂: p = 0.001,  p_norm = 0.001^(1/5) = 0.251,  PPL = 3.98</div>
+  <p>S₁ has lower perplexity, so it is preferred. Normalising matters: raw p always favours shorter sentences, so the geometric mean (p^(1/n)) is used because sentence probability is a product.</p></details>
+ <div class="part"><span class="pl">(c)</span>(2 marks) How do LLM watermarks work?</div>
+ <details class="ans"><summary>Answer (c)</summary><p>Sampling uses a random-number generator; its seed is set from a secret key and the preceding tokens. Text quality is unchanged, but someone holding the key can reproduce the choices and detect the watermark. Without the key it is undetectable; editing words can remove it.</p></details>
+ <div class="scorebox"><label for="sC5">Your marks</label><input id="sC5" type="number" min="0" max="10" inputmode="numeric"> / 10</div>
+</div>
+
+<!-- C6 -->
+<div class="qcard" data-max="14">
+ <h3 id="s20"><span class="num">20</span>Question 6 · GPT, RLHF and ChatGPT<span class="marks">14 marks</span></h3>
+ <div class="part"><span class="pl">(a)</span>(4 marks) Compare GPT-1, GPT-2 and GPT-3 in how each is adapted to a new task.</div>
+ <details class="ans"><summary>Answer (a)</summary><ul><li><b>GPT-1</b> (117M): unsupervised pre-training on books, then <b>supervised fine-tuning</b> on each task (inputs turned into sequences with start, delimiter and end tokens).</li><li><b>GPT-2</b> (1.5B): no fine-tuning; one model handles many tasks via P(output | input, task): <b>zero-shot</b> transfer (weaker than fine-tuned SOTA).</li><li><b>GPT-3</b> (175B): <b>few-shot / in-context learning</b>: a few examples in the prompt, no weight updates.</li></ul></details>
+ <div class="part"><span class="pl">(b)</span>(5 marks) Describe the three steps of RLHF. Why train a reward model rather than use humans directly in step 3?</div>
+ <details class="ans"><summary>Answer (b)</summary><ol><li><b>Supervised fine-tuning</b>: labellers write ideal answers to sampled prompts; fine-tune GPT-3 on them.</li><li><b>Reward model</b>: the model writes several answers per prompt; humans <b>rank</b> them; train a model that scores responses (positive = good, negative = bad).</li><li><b>Reinforcement learning</b> (PPO): the policy answers new prompts, the reward model scores them, and the policy is updated to maximise reward.</li></ol><p>Human feedback is slow and expensive; ranking is easier than writing answers, and once trained the reward model acts as a simulated annotator that can score unlimited outputs.</p></details>
+ <div class="part"><span class="pl">(c)</span>(3 marks) Explain the trade-off between helpfulness and harmlessness, and give two other ChatGPT limitations.</div>
+ <details class="ans"><summary>Answer (c)</summary><p>Training to be more helpful makes it more likely to answer harmful requests; training to be harmless makes it refuse more, including legitimate questions. A balance is needed. Other limitations: plausible but wrong answers (no source of truth in RL); sensitivity to rephrasing; verbosity (trainers preferred longer answers); guessing intent instead of asking; following harmful instructions or showing bias.</p></details>
+ <div class="part"><span class="pl">(d)</span>(2 marks) What are scaling laws and emergent abilities?</div>
+ <details class="ans"><summary>Answer (d)</summary><p>Scaling laws: performance improves smoothly, as a power law, with model size N, data D and compute C (most LLMs are under-trained). Emergent ability: absent in smaller models, present in larger ones.</p></details>
+ <div class="scorebox"><label for="sC6">Your marks</label><input id="sC6" type="number" min="0" max="14" inputmode="numeric"> / 14</div>
+</div>
+
+<!-- C7 -->
+<div class="qcard" data-max="12">
+ <h3 id="s21"><span class="num">21</span>Question 7 · Architectures and efficient attention<span class="marks">12 marks</span></h3>
+ <div class="part"><span class="pl">(a)</span>(3 marks) Which transformer parts do GPT, BERT and BART use, and what is each best at?</div>
+ <details class="ans"><summary>Answer (a)</summary><p>GPT: decoder only, left-to-right → generation. BERT: encoder only, bidirectional → understanding (classification, NER, QA). BART: encoder + decoder, trained as a denoising autoencoder (masking, deletion, permutation, rotation, text infilling) → both generation and comprehension (summarisation, translation).</p></details>
+ <div class="part"><span class="pl">(b)</span>(4 marks) Context length L = 128,000. Full attention computes how many query–key dot products per query? DeepSeek Sparse Attention keeps the top k = 2048. What is the reduction, and how does DSA choose the tokens?</div>
+ <details class="ans"><summary>Answer (b)</summary><p>Full: 128,000 per query (O(L²) overall). DSA: 2,048 per query (O(Lk)) → <b>62.5× fewer</b>. A small fast "lightning indexer" is trained to predict which tokens full attention would weight most and selects the top-k.</p></details>
+ <div class="part"><span class="pl">(c)</span>(2 marks) Why does MiniMax Sparse Attention select blocks of 128 tokens rather than individual tokens?</div>
+ <details class="ans"><summary>Answer (c)</summary><p>Decoding is limited by memory bandwidth when loading the KV cache. Reading contiguous blocks is much faster than scattered tokens and avoids reloading the same context, so it's hardware-aware.</p></details>
+ <div class="part"><span class="pl">(d)</span>(3 marks) Give three reasons transformers outperform LSTMs.</div>
+ <details class="ans"><summary>Answer (d)</summary><p>(1) Variable-size representation (N×E, one vector per token) instead of a fixed-size state, so nothing is squeezed out; LSTMs handle only ~7–15 tokens of dependency. (2) Direct interaction between any two tokens, independent of distance. (3) Parallel computation over all tokens (no recurrence), also better gradient flow.</p></details>
+ <div class="scorebox"><label for="sC7">Your marks</label><input id="sC7" type="number" min="0" max="12" inputmode="numeric"> / 12</div>
+</div>
+<p style="text-align:center;color:var(--muted);font-family:var(--f-mono);font-size:12px">END OF PAPER C</p>
+</section>
+<script>(function(){
+var S=window.DLStore||{get:function(){return null},set:function(){}};var $=function(i){return document.getElementById(i)};
+var papers={A:$('paperA'),B:$('paperB'),C:$('paperC')};var showAll=false;
+function cur(){for(var k in papers)if(!papers[k].hidden)return papers[k];return papers.A}
+function upd(){var sum=0;cur().querySelectorAll('.qcard').forEach(function(c){var i=c.querySelector('input'),max=+c.dataset.max,v=parseFloat(i.value);if(!isNaN(v))sum+=Math.max(0,Math.min(max,v))});$('total').textContent='Score: '+(Math.round(sum*10)/10)+' / 100'}
+function show(w){for(var k in papers)papers[k].hidden=(k!==w);document.querySelectorAll('[data-tab]').forEach(function(b){b.classList.toggle('on',b.dataset.tab===w)});S.set('dl-paper',w);cur().querySelectorAll('details.ans').forEach(function(d){d.open=showAll});upd()}
+document.querySelectorAll('[data-tab]').forEach(function(b){b.addEventListener('click',function(){show(b.dataset.tab);window.scrollTo(0,0)})});
+var left=7200,t=null;function fmt(s){var h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h+':'+String(m).padStart(2,'0')+':'+String(x).padStart(2,'0')}
+function draw(){$('timer').textContent=fmt(left);$('timer').classList.toggle('warn',left<=900)}
+$('tstart').onclick=function(){if(t){clearInterval(t);t=null;this.textContent='Resume';return}t=setInterval(function(){if(left>0){left--;draw()}else{clearInterval(t);t=null;$('timer').textContent='Time up'}},1000);this.textContent='Pause'};
+$('treset').onclick=function(){if(t){clearInterval(t);t=null}left=7200;draw();$('tstart').textContent='Start timer'};draw();
+$('showall').onclick=function(){showAll=!showAll;this.classList.toggle('on',showAll);this.textContent=showAll?'Hide all answers':'Show all answers';cur().querySelectorAll('details.ans').forEach(function(d){d.open=showAll})};
+document.querySelectorAll('.scorebox input').forEach(function(i){var v=S.get('dl-'+i.id);if(v!==null)i.value=v;i.addEventListener('input',function(){S.set('dl-'+i.id,i.value);upd()})});
+var last=S.get('dl-paper');var h=(location.hash||'').replace('#paper','');show(papers[h]?h:(papers[last]?last:'C'));
+})();</script><nav class="pager" aria-label="Chapter navigation"><a class="pv" href="flashcards.html"><small>← Previous</small><span>Flashcards</span></a><a class="nx" href="index.html"><small>Done →</small><span>All chapters</span></a></nav><footer>DASC7606 Deep Learning (Dr Bethany Chan &amp; Prof Francis Chin, 2026). Notes built from lecture slides 01–07 and past papers May 2024 – Dec 2025.</footer></main><script src="app.js"></script></body></html>

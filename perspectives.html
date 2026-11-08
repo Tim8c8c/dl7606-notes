@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Perspectives · DL7606</title><meta name="claude:viewport-fit-sides" content="cover"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;600&display=swap"><link rel="stylesheet" href="style.css"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body data-page="01"><header class="topbar"><div class="in"><a class="badge" href="index.html" aria-label="All chapters">DL·7606</a><span class="pt">01 · L1 Perspectives</span><button class="ibtn" data-fs="-1" aria-label="Smaller text">A−</button><button class="ibtn" data-fs="1" aria-label="Larger text">A+</button></div><div class="progress"></div></header><main class="wrap"><header class="pagehead"><div class="tag">01 · Lecture 1</div><h1>Perspectives<span class="zh">深度學習概論</span></h1><p class="lede">Where deep learning comes from, and the core tools every later chapter uses: cost functions, gradient descent, logistic regression and softmax.</p><nav class="toc" aria-label="Sections"><a href="#s1"><b>01</b>From rules to representation learning</a><a href="#s2"><b>02</b>Cost functions and gradient descent</a><a href="#s3"><b>03</b>Logistic regression, softmax, metrics</a><a href="#recall"><b>✓</b>Recall check</a></nav></header><section class="ch">
+ 
+
+ <h3 id="s1"><span class="num">01</span>From rules to representation learning<span class="zh">由規則到表徵學習</span></h3>
+ <figure><div class="fig">
+ <svg viewBox="0 0 880 250" width="880" role="img" aria-label="Four system types: rule-based, classic ML, representation learning, deep learning">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <g font-size="13">
+  <!-- columns -->
+  <text x="100" y="22" text-anchor="middle" class="bold">Rule-based 規則系統</text>
+  <text x="320" y="22" text-anchor="middle" class="bold">Classic ML 傳統機器學習</text>
+  <text x="540" y="22" text-anchor="middle" class="bold">Representation learning</text>
+  <text x="760" y="22" text-anchor="middle" class="bold">Deep learning 深度學習</text>
+  <!-- rule -->
+  <rect x="40" y="200" width="120" height="30" rx="6" class="node"/><text x="100" y="220" text-anchor="middle">Input</text>
+  <rect x="40" y="130" width="120" height="40" rx="6" class="nodeR"/><text x="100" y="148" text-anchor="middle">Hand-designed</text><text x="100" y="163" text-anchor="middle">program</text>
+  <rect x="40" y="50" width="120" height="30" rx="6" class="node"/><text x="100" y="70" text-anchor="middle">Output</text>
+  <path d="M100 200 V172" class="edge" marker-end="url(#ar)"/><path d="M100 130 V82" class="edge" marker-end="url(#ar)"/>
+  <!-- classic -->
+  <rect x="260" y="200" width="120" height="30" rx="6" class="node"/><text x="320" y="220" text-anchor="middle">Input</text>
+  <rect x="260" y="148" width="120" height="30" rx="6" class="nodeR"/><text x="320" y="168" text-anchor="middle">Hand features</text>
+  <rect x="260" y="98" width="120" height="30" rx="6" class="nodeT"/><text x="320" y="118" text-anchor="middle">Learned mapping</text>
+  <rect x="260" y="50" width="120" height="30" rx="6" class="node"/><text x="320" y="70" text-anchor="middle">Output</text>
+  <path d="M320 200 V180" class="edge" marker-end="url(#ar)"/><path d="M320 148 V130" class="edge" marker-end="url(#ar)"/><path d="M320 98 V82" class="edge" marker-end="url(#ar)"/>
+  <!-- representation -->
+  <rect x="480" y="200" width="120" height="30" rx="6" class="node"/><text x="540" y="220" text-anchor="middle">Input</text>
+  <rect x="480" y="148" width="120" height="30" rx="6" class="nodeT"/><text x="540" y="168" text-anchor="middle">Learned features</text>
+  <rect x="480" y="98" width="120" height="30" rx="6" class="nodeT"/><text x="540" y="118" text-anchor="middle">Learned mapping</text>
+  <rect x="480" y="50" width="120" height="30" rx="6" class="node"/><text x="540" y="70" text-anchor="middle">Output</text>
+  <path d="M540 200 V180" class="edge" marker-end="url(#ar)"/><path d="M540 148 V130" class="edge" marker-end="url(#ar)"/><path d="M540 98 V82" class="edge" marker-end="url(#ar)"/>
+  <!-- deep -->
+  <rect x="700" y="214" width="120" height="26" rx="6" class="node"/><text x="760" y="232" text-anchor="middle">Raw input</text>
+  <rect x="700" y="180" width="120" height="24" rx="6" class="nodeT"/><text x="760" y="197" text-anchor="middle" font-size="12">Simple features</text>
+  <rect x="700" y="146" width="120" height="24" rx="6" class="nodeT"/><text x="760" y="163" text-anchor="middle" font-size="12">More abstract</text>
+  <rect x="700" y="112" width="120" height="24" rx="6" class="nodeT"/><text x="760" y="129" text-anchor="middle" font-size="12">Most complex</text>
+  <rect x="700" y="80" width="120" height="24" rx="6" class="nodeT"/><text x="760" y="97" text-anchor="middle" font-size="12">Learned mapping</text>
+  <rect x="700" y="44" width="120" height="26" rx="6" class="node"/><text x="760" y="62" text-anchor="middle">Output</text>
+  </g>
+  <text x="440" y="248" text-anchor="middle" class="small">Red = designed by a human expert · Teal = learned from data</text>
+ </svg></div>
+ <figcaption>Deep learning learns multiple levels of representation from raw data, the way a child learns "cat" without being told to look at whiskers.</figcaption></figure>
+
+ <ul>
+  <li><b>Turing test (imitation game) 圖靈測試</b>: an interrogator C questions a machine A and a human B. If C cannot tell which is the machine, the machine is "intelligent". ELIZA (first psychotherapy chatbot) faked it with keyword spotting.</li>
+  <li><b>Rule-based / expert systems 專家系統</b>: an expert hand-writes facts and rules (diagnosis, loan approval). Needs an expert for both the features and the rules.</li>
+  <li><b>Learning-based</b>: Turing: "simulate the child's mind, then educate it." Start simple and improve iteratively.</li>
+  <li><b>ABCD of the journey</b>: <b>A</b>lgorithms (backprop, open-source PyTorch/TensorFlow), <b>B</b>ig data (ImageNet ~15M images, 22K categories), <b>C</b>omputing (GPUs, cloud), <b>D</b>ollars (Google, Meta, OpenAI…).</li>
+  <li><b>Supervised learning</b>: training data = practice exercises, validation = mock exams, test = final exam. Learn hypothesis G ≈ unknown F from pairs (x, y).</li>
+ </ul>
+
+ <h3 id="s2"><span class="num">02</span>Cost functions and gradient descent<span class="zh">成本函數與梯度下降</span></h3>
+ <p><b>Loss</b> is for one example; <b>cost J(θ)</b> is the average loss over the whole training set.</p>
+ <div class="formula">MSE (L2):        J(θ) = (1/M) Σ (h(xᵢ) − yᵢ)²        (often ½ MSE: 1/(2M))
+Absolute (L1):   J(θ) = (1/M) Σ |h(xᵢ) − yᵢ|
+Binary CE:       J = −[ y·log h(x) + (1−y)·log(1−h(x)) ]
+Categorical CE:  J = −Σ_c y_c · log h_c(x)        e.g. y=[0,1,0], h=[.94,.01,.05] → −log 0.01
+
+Gradient descent:  θ ← θ − α · ∂J/∂θ          α = learning rate 學習率
+Linear regression: ∂J/∂θⱼ = (1/M) Σ (h(xᵢ) − yᵢ)·xᵢⱼ
+Logistic regression gives the SAME update form (with h = σ(θx)).</div>
+ <div class="grid2">
+  <div class="box"><h4>Gradient intuition</h4><ul><li>Slope &gt; 0 → θ decreases; slope &lt; 0 → θ increases.</li><li>Steep slope → big step; flat slope → small step.</li></ul></div>
+  <div class="box"><h4>Regression vs classification 迴歸 vs 分類</h4><ul><li>Regression: continuous answer (height, rent, probability).</li><li>Classification: discrete answer (heart attack yes/no, digit 0–9).</li></ul></div>
+ </div>
+
+ <h3 id="s3"><span class="num">03</span>Logistic regression, softmax, metrics<span class="zh">邏輯迴歸、Softmax、評估指標</span></h3>
+ <div class="formula">σ(s) = 1 / (1 + e^(−s))          σ'(s) = σ(s)(1 − σ(s))  ≤ 0.25
+Predict 1 if σ(s) &gt; 0.5  ⇔  s &gt; 0
+softmax(s)_k = e^(s_k) / Σ_j e^(s_j)       2-class softmax = sigmoid of (s₁ − s₂)
+
+precision = TP / (TP + FP)      recall = TP / (TP + FN)
+F1 = 2·P·R / (P + R)   (harmonic mean punishes one extreme value)</div>
+ <ul>
+  <li>Raise the threshold → fewer positives → <b>precision ↑, recall ↓</b>. Criminal prosecution wants high precision; disease screening wants high recall; terrorist identification wants both.</li>
+  <li>Why exponentials in softmax? They push the largest score towards 1 and the rest towards 0, and keep all outputs positive and summing to 1.</li>
+  <li>PR curve: area under it (AUC) high ⇒ both P and R high. Average Precision (AP) for detection is this area.</li>
+ </ul>
+ <div class="callout zhbox"><div class="lab">中文重點</div>
+  <p>監督式學習用 (x, y) 訓練假設函數 G ≈ F。成本函數：迴歸用均方誤差 (MSE)，分類用交叉熵 (cross-entropy)。梯度下降：θ ← θ − α∇J。提高閾值 → 精確率 (precision) 上升、召回率 (recall) 下降。Softmax 把分數變成總和為 1 的機率。</p></div>
+ <div class="callout exam"><div class="lab">Exam pattern 考點</div>
+  <p>Dec 2025 Q1 asked: name two loss functions with formula and application (MSE → regression; cross-entropy → classification), two regularisation terms (L1/L2 weight penalty), and two uses of <b>gradient ascent</b> (generating an image that maximally activates a neuron; FGSM adversarial examples; also GAN generator / maximising class score). See <a href="solved.html">Past questions, solved</a>.</p></div>
+</section><section class="recall" id="recall"><h2>Recall check<span class="zh">即時測驗</span></h2><p class="qscore"></p><div class="mcq"><p class="qq">Raising the classification threshold usually…</p><div class="opts"><button class="o">raises recall, lowers precision</button><button class="o" data-ok>raises precision, lowers recall</button><button class="o">raises both</button><button class="o">has no effect</button></div><div class="exp">Fewer things are called positive, so fewer false positives (precision ↑) but more missed positives (recall ↓).</div></div><div class="mcq"><p class="qq">Which cost function fits classification with a sigmoid output?</p><div class="opts"><button class="o">Mean squared error</button><button class="o" data-ok>Binary cross-entropy</button><button class="o">Absolute error</button><button class="o">Hinge on raw scores</button></div><div class="exp">−[y log h + (1−y) log(1−h)]. MSE is for regression.</div></div><div class="mcq"><p class="qq">The gradient-descent update is…</p><div class="opts"><button class="o">θ ← θ + α∇J</button><button class="o" data-ok>θ ← θ − α∇J</button><button class="o">θ ← α − ∇J</button><button class="o">θ ← θ·α∇J</button></div><div class="exp">Step against the slope; α is the learning rate.</div></div><div class="mcq"><p class="qq">Disease screening should prioritise…</p><div class="opts"><button class="o">precision</button><button class="o" data-ok>recall</button><button class="o">accuracy only</button><button class="o">F1 = 0</button></div><div class="exp">Missing a sick patient (false negative) is the costly error.</div></div><div class="mcq"><p class="qq">F1 uses the harmonic mean because…</p><div class="opts"><button class="o">it is easier to compute</button><button class="o" data-ok>it punishes one extreme low value</button><button class="o">it ignores recall</button><button class="o">it is always 1</button></div><div class="exp">P = 1, R = 0.01 gives F1 ≈ 0.02, not 0.5.</div></div><div class="mcq"><p class="qq">What does &#x27;D&#x27; stand for in the ABCD of deep learning&#x27;s success?</p><div class="opts"><button class="o">Data</button><button class="o" data-ok>Dollars</button><button class="o">Dropout</button><button class="o">Depth</button></div><div class="exp">Algorithms, Big data, Computing, Dollars.</div></div><p style="margin-top:12px"><button class="ibtn" data-reset-quiz>Reset quiz</button></p></section><div class="donebar"><button class="donebtn">Mark this chapter as studied</button></div><nav class="pager" aria-label="Chapter navigation"><a class="pv" href="exam.html"><small>← Previous</small><span>Exam guide</span></a><a class="nx" href="neural-nets.html"><small>Next →</small><span>L2 Neural nets</span></a></nav><footer>DASC7606 Deep Learning (Dr Bethany Chan &amp; Prof Francis Chin, 2026). Notes built from lecture slides 01–07 and past papers May 2024 – Dec 2025.</footer></main><script src="app.js"></script></body></html>

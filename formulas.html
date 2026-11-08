@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Formula sheet and glossary · DL7606</title><meta name="claude:viewport-fit-sides" content="cover"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;600&display=swap"><link rel="stylesheet" href="style.css"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body data-page="11"><header class="topbar"><div class="in"><a class="badge" href="index.html" aria-label="All chapters">DL·7606</a><span class="pt">11 · Formulas</span><button class="ibtn" data-fs="-1" aria-label="Smaller text">A−</button><button class="ibtn" data-fs="1" aria-label="Larger text">A+</button></div><div class="progress"></div></header><main class="wrap"><header class="pagehead"><div class="tag">11 · Memorise</div><h1>Formula sheet and glossary<span class="zh">必背公式與詞彙</span></h1><p class="lede">Everything to memorise for a closed-book paper, now including lectures 6–7. Write the key ones on the rough sheet in the first two minutes.</p><nav class="toc" aria-label="Sections"><a href="#s1"><b>01</b>Formulas</a><a href="#s2"><b>02</b>Glossary</a><a href="#recall"><b>✓</b>Recall check</a></nav></header><section class="ch">
+ 
+ <h3 id="s1"><span class="num">01</span>Formulas<span class="zh">公式</span></h3><p>Closed book, so these need to be in your head. Write them on the rough worksheet in the first two minutes of the exam.</p>
+ <div class="tbl"><table>
+ <tr><th>Topic</th><th>Formula</th></tr>
+ <tr><td>Gradient descent</td><td class="m">θ ← θ − α ∂J/∂θ</td></tr>
+ <tr><td>MSE / cross-entropy</td><td class="m">(1/M)Σ(h−y)² ; −[y log h + (1−y) log(1−h)] ; −Σ y_c log h_c</td></tr>
+ <tr><td>Sigmoid, tanh derivatives</td><td class="m">σ' = σ(1−σ) ≤ 0.25 ; tanh' = 1 − tanh²</td></tr>
+ <tr><td>Softmax</td><td class="m">e^(s_k) / Σ e^(s_j)</td></tr>
+ <tr><td>Precision, recall, F1</td><td class="m">TP/(TP+FP) ; TP/(TP+FN) ; 2PR/(P+R)</td></tr>
+ <tr><td>Backprop</td><td class="m">δ⁽ᴸ⁾ = h − y ; δ⁽ˡ⁾ = g'(s⁽ˡ⁾)∘δ⁽ˡ⁺¹⁾W⁽ˡ⁺¹⁾ᵀ ; ∂J/∂W⁽ˡ⁾ = x⁽ˡ⁻¹⁾ᵀδ⁽ˡ⁾</td></tr>
+ <tr><td>Momentum</td><td class="m">v ← ρv − α∇J ; w ← w + v</td></tr>
+ <tr><td>Adam</td><td class="m">m ← β₁m + (1−β₁)∇J ; v ← β₂v + (1−β₂)∇J² ; w ← w − α m/√(v+ε)</td></tr>
+ <tr><td>Standardise / BatchNorm</td><td class="m">(x − μ)/σ ; γ·x̂ + β</td></tr>
+ <tr><td>Conv output size</td><td class="m">M = ⌊(N + 2P − F)/S⌋ + 1</td></tr>
+ <tr><td>Conv params</td><td class="m">K(F·F·C_in + 1)</td></tr>
+ <tr><td>Conv multiplications</td><td class="m">M·M·K · F·F·C_in</td></tr>
+ <tr><td>FC params / mults</td><td class="m">(n_in + 1)n_out ; n_in·n_out</td></tr>
+ <tr><td>Receptive field</td><td class="m">r ← r + (F − 1)·j ; j ← j·S</td></tr>
+ <tr><td>IoU</td><td class="m">|A∩B| / |A∪B|</td></tr>
+ <tr><td>YOLO output</td><td class="m">S × S × (5B + C)</td></tr>
+ <tr><td>FGSM</td><td class="m">x + ε·sign(∇ₓJ(θ, x, y))</td></tr>
+ <tr><td>RNN</td><td class="m">s_t = g(Wx_t + Us_{t−1}) ; y_t = g(Vs_t)</td></tr>
+ <tr><td>LSTM state</td><td class="m">s_t = f_t∗s_{t−1} + i_t∗C̃_t ; y_t = o_t∗tanh(s_t)</td></tr>
+ <tr><td>CBOW</td><td class="m">ṽ = XU/m ; ŷ = softmax(ṽU')</td></tr>
+ <tr><td>Attention</td><td class="m">softmax(QKᵀ/√d_k)V</td></tr>
+ <tr><td>Positional encoding</td><td class="m">sin(pos/10000^(2i/E)), cos(pos/10000^(2i/E))</td></tr>
+ <tr><td>GAN loss</td><td class="m">D: −log D(x) − log(1 − D(G(z))) ; G: −log D(G(z))</td></tr>
+ <tr><td>LLM params</td><td class="m">2VE + L(4E² + 3EH + 2E)</td></tr>
+ <tr><td>Weight memory</td><td class="m">params × bits / 8 bytes</td></tr>
+ <tr><td>LoRA</td><td class="m">ΔW = AB, params r(d + k) vs dk</td></tr>
+ <tr><td>Multi-head</td><td class="m">d = E / heads ; softmax((QKᵀ + mask)/√d)V per head</td></tr><tr><td>Layer params</td><td class="m">attention 4E²+4E ; FFN 2EH+E+H ; norm 2E</td></tr><tr><td>Encoder / decoder layer</td><td class="m">≈ 4E² + 2EH ; ≈ 8E² + 2EH</td></tr><tr><td>GPT-2 total</td><td class="m">VE + NE + L(4E² + 2EH + 9E + H) + 2E</td></tr><tr><td>Llama total</td><td class="m">2VE + L(4E² + 3EH + 2E) + E</td></tr><tr><td>Sparse attention</td><td class="m">O(L²) → O(Lk)</td></tr><tr><td>BERT QA</td><td class="m">P(start=i) = softmax(S·Tᵢ) ; P(end=i) = softmax(E·Tᵢ)</td></tr><tr><td>BERT classifier</td><td class="m">K×H (+K) on [CLS]</td></tr><tr><td>Language model</td><td class="m">P(S) = Π P(wᵢ | w₁…wᵢ₋₁)</td></tr><tr><td>Temperature</td><td class="m">p = softmax(z/T)</td></tr><tr><td>Perplexity</td><td class="m">PPL = p(x₁…xₙ)^(−1/n)  (lower = better)</td></tr><tr><td>Beam / greedy</td><td class="m">greedy: argmax each step ; beam: keep top-k sequences</td></tr></table></div>
+ <div class="callout tip"><div class="lab">Traps that cost marks</div>
+  <ul><li>Forgetting the <b>+1 bias per filter</b> in parameter counts (but not in multiplication counts).</li>
+  <li>Forgetting the <b>input depth C_in</b> in the filter size: a 3×3 filter on 192 channels is 3×3×192.</li>
+  <li>Giving pooling layers parameters. They have none.</li>
+  <li>Using log base 10. Use natural log (ln) for cross-entropy unless told otherwise.</li>
+  <li>Forgetting to scale by √d_k when the question says "scaled dot-product attention", or adding it when the question says plain dot product.</li>
+  <li>For "explain" questions: give the mechanism <i>and</i> the consequence (e.g. "σ' ≤ 0.25 multiplies at every layer → gradient shrinks exponentially → early layers stop learning").</li></ul></div>
+</section><section class="ch">
+ 
+ <h3 id="s2"><span class="num">02</span>Glossary<span class="zh">中英詞彙對照</span></h3><div class="tbl"><table>
+ <tr><th>English</th><th>繁體中文</th><th>English</th><th>繁體中文</th></tr>
+ <tr><td>supervised learning</td><td class="zh">監督式學習</td><td>convolution</td><td class="zh">卷積</td></tr>
+ <tr><td>cost / loss function</td><td class="zh">成本函數／損失函數</td><td>filter / kernel</td><td class="zh">濾波器／卷積核</td></tr>
+ <tr><td>gradient descent</td><td class="zh">梯度下降</td><td>stride / padding</td><td class="zh">步幅／填充</td></tr>
+ <tr><td>learning rate</td><td class="zh">學習率</td><td>pooling</td><td class="zh">池化</td></tr>
+ <tr><td>logistic regression</td><td class="zh">邏輯迴歸</td><td>feature map</td><td class="zh">特徵圖</td></tr>
+ <tr><td>cross-entropy</td><td class="zh">交叉熵</td><td>local receptive field</td><td class="zh">局部感受野</td></tr>
+ <tr><td>precision / recall</td><td class="zh">精確率／召回率</td><td>parameter sharing</td><td class="zh">參數共享</td></tr>
+ <tr><td>perceptron</td><td class="zh">感知器</td><td>fully connected layer</td><td class="zh">全連接層</td></tr>
+ <tr><td>activation function</td><td class="zh">激活函數</td><td>residual connection</td><td class="zh">殘差連接</td></tr>
+ <tr><td>hidden layer</td><td class="zh">隱藏層</td><td>bounding box</td><td class="zh">邊界框</td></tr>
+ <tr><td>backpropagation</td><td class="zh">反向傳播</td><td>object detection</td><td class="zh">物件偵測</td></tr>
+ <tr><td>chain rule</td><td class="zh">連鎖律</td><td>semantic segmentation</td><td class="zh">語義分割</td></tr>
+ <tr><td>vanishing gradient</td><td class="zh">梯度消失</td><td>non-max suppression</td><td class="zh">非極大值抑制</td></tr>
+ <tr><td>momentum</td><td class="zh">動量</td><td>adversarial example</td><td class="zh">對抗樣本</td></tr>
+ <tr><td>overfitting / underfitting</td><td class="zh">過擬合／欠擬合</td><td>recurrent neural network</td><td class="zh">循環神經網絡</td></tr>
+ <tr><td>regularisation</td><td class="zh">正則化</td><td>long short-term memory</td><td class="zh">長短期記憶</td></tr>
+ <tr><td>dropout</td><td class="zh">隨機失活</td><td>word embedding</td><td class="zh">詞嵌入</td></tr>
+ <tr><td>early stopping</td><td class="zh">提早停止</td><td>attention mechanism</td><td class="zh">注意力機制</td></tr>
+ <tr><td>batch normalisation</td><td class="zh">批次正規化</td><td>self-attention</td><td class="zh">自注意力</td></tr>
+ <tr><td>data augmentation</td><td class="zh">數據增強</td><td>positional encoding</td><td class="zh">位置編碼</td></tr>
+ <tr><td>knowledge distillation</td><td class="zh">知識蒸餾</td><td>encoder / decoder</td><td class="zh">編碼器／解碼器</td></tr>
+ <tr><td>validation set</td><td class="zh">驗證集</td><td>teacher forcing</td><td class="zh">教師強制</td></tr>
+ <tr><td>generative adversarial network</td><td class="zh">生成對抗網絡</td><td>hallucination</td><td class="zh">幻覺</td></tr>
+ <tr><td>mode collapse</td><td class="zh">模式崩潰</td><td>quantisation</td><td class="zh">量化</td></tr>
+ <tr><td>large language model</td><td class="zh">大型語言模型</td><td>low-rank adaptation</td><td class="zh">低秩適應</td></tr>
+ <tr><td>scaled dot-product attention</td><td class="zh">縮放點積注意力</td><td>multi-head attention</td><td class="zh">多頭注意力</td></tr><tr><td>masked language model</td><td class="zh">遮罩語言模型</td><td>next sentence prediction</td><td class="zh">下一句預測</td></tr><tr><td>tokenization / subword</td><td class="zh">分詞／子詞</td><td>fine-tuning</td><td class="zh">微調</td></tr><tr><td>pre-training</td><td class="zh">預訓練</td><td>language model</td><td class="zh">語言模型</td></tr><tr><td>greedy search / beam search</td><td class="zh">貪婪搜尋／集束搜尋</td><td>temperature</td><td class="zh">溫度</td></tr><tr><td>perplexity</td><td class="zh">困惑度</td><td>reinforcement learning from human feedback</td><td class="zh">基於人類回饋的強化學習</td></tr><tr><td>reward model</td><td class="zh">獎勵模型</td><td>emergent ability</td><td class="zh">湧現能力</td></tr><tr><td>scaling law</td><td class="zh">規模定律</td><td>few-shot / zero-shot</td><td class="zh">少樣本／零樣本</td></tr><tr><td>watermark</td><td class="zh">浮水印</td><td>sparse attention</td><td class="zh">稀疏注意力</td></tr></table></div>
+</section><section class="recall" id="recall"><h2>Recall check<span class="zh">即時測驗</span></h2><p class="qscore"></p><div class="mcq"><p class="qq">Conv multiplications formula?</p><div class="opts"><button class="o">K(F²C + 1)</button><button class="o" data-ok>M²K · F²C</button><button class="o">M² · F</button><button class="o">N²K</button></div><div class="exp">Output size × filter volume. No bias term.</div></div><div class="mcq"><p class="qq">FC layer 784 → 10 parameters?</p><div class="opts"><button class="o">7,840</button><button class="o" data-ok>7,850</button><button class="o">794</button><button class="o">784</button></div><div class="exp">(784 + 1) × 10.</div></div><div class="mcq"><p class="qq">Weight memory for P params at b bits?</p><div class="opts"><button class="o">P·b</button><button class="o" data-ok>P·b/8 bytes</button><button class="o">P/b</button><button class="o">8P/b</button></div><div class="exp">8 bits = 1 byte.</div></div><p style="margin-top:12px"><button class="ibtn" data-reset-quiz>Reset quiz</button></p></section><div class="donebar"><button class="donebtn">Mark this chapter as studied</button></div><nav class="pager" aria-label="Chapter navigation"><a class="pv" href="solved.html"><small>← Previous</small><span>Past Qs solved</span></a><a class="nx" href="flashcards.html"><small>Next →</small><span>Flashcards</span></a></nav><footer>DASC7606 Deep Learning (Dr Bethany Chan &amp; Prof Francis Chin, 2026). Notes built from lecture slides 01–07 and past papers May 2024 – Dec 2025.</footer></main><script src="app.js"></script></body></html>

@@ -1,0 +1,101 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Past questions, solved · DL7606</title><meta name="claude:viewport-fit-sides" content="cover"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;600&display=swap"><link rel="stylesheet" href="style.css"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body data-page="10"><header class="topbar"><div class="in"><a class="badge" href="index.html" aria-label="All chapters">DL·7606</a><span class="pt">10 · Past Qs solved</span><button class="ibtn" data-fs="-1" aria-label="Smaller text">A−</button><button class="ibtn" data-fs="1" aria-label="Larger text">A+</button></div><div class="progress"></div></header><main class="wrap"><header class="pagehead"><div class="tag">10 · Worked answers</div><h1>Past questions, solved<span class="zh">歷屆試題詳解</span></h1><p class="lede">Model answers to the question types that keep coming back. Try each one first, then tap to open the answer.</p><nav class="toc" aria-label="Sections"><a href="#s1"><b>01</b>Dec 2025 Q5 · Attention by hand (18 marks)</a><a href="#s2"><b>02</b>Dec 2025 Q2 · CNN layer types (12 marks)</a><a href="#s3"><b>03</b>May 2024 Q1 · CNN table (30 marks)</a><a href="#s4"><b>04</b>May 2025 Q6 · VGG, 1×1 bottleneck, ResNet, GoogLeNet (24 marks)</a><a href="#s5"><b>05</b>Dec 2024 Q3 · Skip connection gradient (15 marks)</a><a href="#s6"><b>06</b>May 2025 Q3 · Quantisation (10 marks)</a><a href="#s7"><b>07</b>May 2025 Q4 · LoRA (10 marks)</a><a href="#s8"><b>08</b>May 2025 Q5(a) · Undo positional encoding (3 marks)</a><a href="#s9"><b>09</b>Statement questions (C-section, Dec 2024 &amp;amp; Dec 2025)</a><a href="#s10"><b>10</b>Dec 2025 C Q3 · RNN for running variance (30 marks)</a><a href="#s11"><b>11</b>Dec 2025 C Q2 · Checkerboard CNN (30 marks)</a><a href="#s12"><b>12</b>Dec 2024 C Q3 · Card game MDP (30 marks)</a><a href="#recall"><b>✓</b>Recall check</a></nav></header><section class="ch">
+ 
+ <p>Model answers for the recurring question types. Try each one before opening the answer. Numbers were checked by computer; wording for "explain" questions is a suggested answer, since no official marking scheme was provided.</p>
+
+ <h3 id="s1"><span class="num">01</span>Dec 2025 Q5 · Attention by hand (18 marks)</h3>
+ <p class="q">Q(cat) = [1,0,1]; K(chases) = [1,1,0], V = [0.5,0,0.5]; K(mouse) = [0,1,1], V = [1,0.5,0]. Scores, softmax, output.</p>
+ <details class="ans"><summary>Show answer</summary>
+ <div class="formula">(a) score(cat, chases) = 1·1 + 0·1 + 1·0 = 1
+    score(cat, mouse)  = 1·0 + 0·1 + 1·1 = 1
+(b) softmax(sᵢ) = e^(sᵢ) / Σⱼ e^(sⱼ)  →  e¹/(e¹+e¹) = 0.5 each
+(c) output = 0.5·[0.5, 0, 0.5] + 0.5·[1, 0.5, 0] = [0.75, 0.25, 0.25]</div>
+ <p>Interpretation: "cat" attends equally to "chases" and "mouse", so its new representation is an even blend of the action and the object it relates to. (If the question had said "scaled dot product", divide by √3 first; equal scores still give 0.5/0.5.)</p></details>
+
+ <h3 id="s2"><span class="num">02</span>Dec 2025 Q2 · CNN layer types (12 marks)</h3>
+ <details class="ans"><summary>Show answer</summary>
+ <div class="tbl"><table><tr><th>Layer</th><th>Purpose</th><th>Parameters</th><th>Connections (mults)</th></tr>
+ <tr><td>Convolution</td><td>Detect local features with shared filters (edges → parts → objects)</td><td class="n">K·(F·F·C + 1)</td><td class="n">M·M·K·F·F·C</td></tr>
+ <tr><td>Pooling</td><td>Down-sample; translation invariance; fewer values, less overfitting</td><td class="n">0</td><td class="n">0 multiplications (M·M·K·F·F comparisons)</td></tr>
+ <tr><td>Fully connected</td><td>Combine all features for the final classification</td><td class="n">(n_in + 1)·n_out</td><td class="n">n_in·n_out</td></tr></table></div>
+ <p>Add an example with numbers (e.g. 32×32×3 → Conv3-8: 224 params, 221,184 mults) to secure the marks.</p></details>
+
+ <h3 id="s3"><span class="num">03</span>May 2024 Q1 · CNN table (30 marks)</h3>
+ <p class="q">32×32×3 → Conv3-8 → Pool2 → Conv3-16 → Pool2 → Flatten → FC-4, "same" convolutions.</p>
+ <details class="ans"><summary>Show answer</summary>
+ <div class="tbl"><table><tr><th>Layer</th><th>Output</th><th class="n">Params</th><th class="n">Mults</th><th>LRF</th></tr>
+ <tr><td>Conv3-8 (P=1, S=1)</td><td class="n">32×32×8</td><td class="n">8·(3·3·3+1) = 224</td><td class="n">32·32·8·27 = 221,184</td><td>3×3</td></tr>
+ <tr><td>Pool2</td><td class="n">16×16×8</td><td class="n">0</td><td class="n">0</td><td>4×4</td></tr>
+ <tr><td>Conv3-16</td><td class="n">16×16×16</td><td class="n">16·(72+1) = 1,168</td><td class="n">16·16·16·72 = 294,912</td><td>8×8</td></tr>
+ <tr><td>Pool2</td><td class="n">8×8×16</td><td class="n">0</td><td class="n">0</td><td>10×10</td></tr>
+ <tr><td>Flatten</td><td class="n">1024</td><td class="n">0</td><td class="n">0</td><td>10×10</td></tr>
+ <tr><td>FC-4</td><td class="n">4</td><td class="n">1024·4+4 = 4,100</td><td class="n">4,096</td><td>32×32</td></tr></table></div>
+ <ul><li>(c) FLATTEN + FC-4 = <b>CONV8-4</b>: four 8×8×16 filters, 4,100 params, 4,096 mults.</li>
+ <li>(d) 256×256×3 input: after layer 4 → 64×64×16; final conv → (64 − 8) + 1 = <b>57×57×4</b>.</li>
+ <li>(e) Equivalent to <b>57² = 3,249</b> sliding windows of 32×32 with <b>stride 4</b> (two 2×2 pools).</li></ul></details>
+
+ <h3 id="s4"><span class="num">04</span>May 2025 Q6 · VGG, 1×1 bottleneck, ResNet, GoogLeNet (24 marks)</h3>
+ <details class="ans"><summary>Show answer</summary>
+ <ul><li>(a) After one 3×3 layer each output sees 3×3; a second 3×3 layer sees 3 neighbouring 3×3 windows → 5×5; a third → 7×7.</li>
+ <li>(b) Parameters per C→C layer: three 3×3 layers = 3·9C² = 27C² vs one 7×7 = 49C² (45% fewer), plus three non-linearities.</li>
+ <li>(c) Padding 1, stride 1.</li>
+ <li>(d) 28·28·128 · 3·3·192 = <b>173,408,256</b> mults.</li>
+ <li>(e) 1×1: 28·28·64·192 = 9,633,792; then 3×3: 28·28·128·3·3·64 = 57,802,752; total <b>67,436,544</b>. Technique: 1×1 convolution / <b>bottleneck layer</b> (from Inception).</li>
+ <li>(f) Saves 105,971,712 mults, about <b>61%</b>.</li>
+ <li>(g) ResNet: residual (skip) connections, learning F(x) = H(x) − x.</li>
+ <li>(h) GoogLeNet: auxiliary classifiers in the middle that inject gradient, plus 1×1 bottlenecks and global average pooling to stay efficient.</li></ul></details>
+
+ <h3 id="s5"><span class="num">05</span>Dec 2024 Q3 · Skip connection gradient (15 marks)</h3>
+ <p class="q">s = Wᵢxᵢ + bᵢ, aᵢ₊₁ = σ(sᵢ), xᵢ₊₁ = aᵢ₊₁ + xᵢ. Given δᵢ₊₁ = ∂J/∂xᵢ₊₁, find δᵢ = ∂J/∂xᵢ.</p>
+ <details class="ans"><summary>Show answer</summary>
+ <div class="formula">δᵢ = ∂J/∂xᵢ = (∂xᵢ₊₁/∂xᵢ)ᵀ δᵢ₊₁
+   = Wᵢᵀ ( σ'(sᵢ) ∘ δᵢ₊₁ )  +  δᵢ₊₁            with σ'(s) = σ(s)(1 − σ(s))
+     └──── through the layer ────┘   └ through the skip ┘</div>
+ <p>(b) Even when σ' ≤ 0.25 makes the first term tiny, the identity term passes δᵢ₊₁ back unchanged, so gradients reach early layers without shrinking. Over many blocks the gradient is a sum of paths, one of which is pure identity.</p></details>
+
+ <h3 id="s6"><span class="num">06</span>May 2025 Q3 · Quantisation (10 marks)</h3>
+ <details class="ans"><summary>Show answer</summary>
+ <ul><li>(a) 0.90 → nearest level 1.00 (|0.10| &lt; |0.18|) → <b>1111</b>. −0.60 → nearest −0.53 (0.07 &lt; 0.10) → <b>0010</b>.</li>
+ <li>(b) 70B × 4 bits = 35 GB → smallest GPU is <b>L40S (48 GB)</b>.</li>
+ <li>(c) Uniform: 16 evenly spaced values, step 2/15 ≈ 0.133: −1.00, −0.87, −0.73, −0.60, −0.47, −0.33, −0.20, −0.07, 0.07, 0.20, 0.33, 0.47, 0.60, 0.73, 0.87, 1.00.</li>
+ <li>(d) Real weights are roughly normal, concentrated near 0. The table in (a) puts more levels where most weights are, so the average rounding error is smaller.</li></ul></details>
+
+ <h3 id="s7"><span class="num">07</span>May 2025 Q4 · LoRA (10 marks)</h3>
+ <details class="ans"><summary>Show answer</summary>
+ <ul><li>(a) Full: 4E². LoRA: 4(Er + rE) = 8Er. Need 4E²/(8Er) = E/(2r) ≥ 1000 → r ≤ 5120/2000 = 2.56 → <b>r = 2</b>.</li>
+ <li>(b) Full: 2EH. LoRA: 2r(E + H). Need EH/(r(E+H)) ≥ 1000 → r ≤ 5120·13824/(1000·18944) = 3.74 → <b>r = 3</b>.</li>
+ <li>(c) A, C, D (training GPU memory, amount of fine-tuning data, output quality). Inference GPU is unaffected once A·B is merged into W.</li>
+ <li>(d) A and C (efficient training; one base model with small swappable adapters for many tasks). B is arguable: fewer trainable parameters lowers, but does not prevent, overfitting.</li></ul></details>
+
+ <h3 id="s8"><span class="num">08</span>May 2025 Q5(a) · Undo positional encoding (3 marks)</h3>
+ <details class="ans"><summary>Show answer</summary>
+ <p>Subtract position i's vector from row i: [1,0,0,1] Ann · [0,0,1,1] like · [0,0,0,1] #s · [0,0,−1,−1] small · [0,−1,0,1] white · [−1,0,0,0] cat · [0,0,0,1] #s → <b>"Ann like #s small white cat #s"</b>. (c) After self-attention, "dog" moves towards the tokens it attends to most (similar dimensions), becoming a context-aware blend; e.g. it picks up the "black" colour and "big" size features.</p></details>
+
+ <h3 id="s9"><span class="num">09</span>Statement questions (C-section, Dec 2024 &amp; Dec 2025)</h3>
+ <details class="ans"><summary>Show answers</summary>
+ <ul><li>Dec 25 C Q4(a) transformers: <b>1, 3</b> (no recurrence → better gradient flow; GPT = Generative Pre-trained Transformer). 2 is false (more parallel), 4 false (2017).</li>
+ <li>Dec 25 C Q4(b) adversarial training: <b>2</b> only.</li>
+ <li>Dec 25 C Q4(c) neural networks: <b>3</b> only (NNs approximate non-convex functions too; GD need not converge to a local min from any start).</li>
+ <li>Dec 24 C Q1(a) zero-centred: <b>4</b> (all-positive inputs → gradients all the same sign → zig-zag).</li>
+ <li>Dec 24 C Q1(b) backprop: <b>1</b> only (BP computes gradients; the update is separate; the backward pass is sequential over layers).</li>
+ <li>Dec 24 C Q1(c) ResNet: <b>2, 3</b>.</li></ul></details>
+
+ <h3 id="s10"><span class="num">10</span>Dec 2025 C Q3 · RNN for running variance (30 marks)</h3>
+ <details class="ans"><summary>Show answer</summary>
+ <p>State sₜ = (Sₜ, Qₜ, cₜ) = (Σx, Σx², count), update sₜ = W xₜ + U sₜ₋₁ + b, output rₜ = Qₜ/cₜ − (Sₜ/cₜ)².</p>
+ <ul><li>(a) cₜ = t.</li>
+ <li>(b) x ∈ {0,1} (so x² = x): W is 3×1 = [1; 1; 0], U = I₃ (3×3), b = [0; 0; 1].</li>
+ <li>(c) x ∈ {0,2} (x² = 2x): W = [1; 2; 0], U = I₃, b = [0; 0; 1].</li>
+ <li>(d) x ∈ {1,2} (x² = 3x − 2): W = [1; 3; 0], U = I₃, b = [0; −2; 1].</li></ul></details>
+
+ <h3 id="s11"><span class="num">11</span>Dec 2025 C Q2 · Checkerboard CNN (30 marks)</h3>
+ <details class="ans"><summary>Show answer</summary>
+ <ul><li>(a) Conv 2×2, stride 2 on 26×26 → <b>13×13×2</b>.</li>
+ <li>(b, c) Sum-pool sizes 13 →(P=1) 7 →(P=1) 4 → 2 → 1, so <b>k = 4</b>; second and third pooling paddings are <b>1 and 0</b>.</li>
+ <li>(d) Filters [[1,−1],[−1,1]] and [[−1,1],[1,−1]]. Each 2×2 block of a checkerboard gives exactly 2 for one filter (its maximum possible value); any other block gives less.</li>
+ <li>(e) Zero padding adds nothing, so the summed value for a perfect board is 169 × 2 = <b>t = 338</b>.</li></ul></details>
+
+ <h3 id="s12"><span class="num">12</span>Dec 2024 C Q3 · Card game MDP (30 marks)</h3>
+ <details class="ans"><summary>Show answer (parts a, b)</summary>
+ <ul><li>(a) Stand on 3: win if y ∈ {1,2} (2/3) or y = 3 and heads (1/6) → <b>r = 5/6</b>.</li>
+ <li>(b) Values: stand on 1 = 1/6, stand on 2 = 1/3 + 1/6 = 1/2, stand on 3 = 5/6. Hit on 2 = (1/3)(5/6) = 5/18 &lt; 1/2. Hit on 1 = (1/3)(1/2) + (1/3)(5/6) = 4/9 &gt; 1/6. Optimal policy <b>HSS</b>.</li></ul></details>
+</section><section class="recall" id="recall"><h2>Recall check<span class="zh">即時測驗</span></h2><p class="qscore"></p><div class="mcq"><p class="qq">May 2025: 0.90 maps to which 4-bit code?</p><div class="opts"><button class="o">1110</button><button class="o" data-ok>1111</button><button class="o">1101</button><button class="o">0111</button></div><div class="exp">Nearest level is 1.00 (0.10 away) not 0.72 (0.18 away).</div></div><div class="mcq"><p class="qq">Dec 2025: Q = [1,0,1], K₁ = [1,1,0], K₂ = [0,1,1]. Softmax weights?</p><div class="opts"><button class="o">0.73, 0.27</button><button class="o" data-ok>0.5, 0.5</button><button class="o">1, 0</button><button class="o">0.27, 0.73</button></div><div class="exp">Both dot products are 1.</div></div><div class="mcq"><p class="qq">Skip connection gradient: δᵢ = Wᵀ(σ&#x27;∘δᵢ₊₁) + …</p><div class="opts"><button class="o">0</button><button class="o" data-ok>δᵢ₊₁</button><button class="o">σ&#x27;</button><button class="o">W</button></div><div class="exp">The identity path passes δᵢ₊₁ straight back.</div></div><p style="margin-top:12px"><button class="ibtn" data-reset-quiz>Reset quiz</button></p></section><div class="donebar"><button class="donebtn">Mark this chapter as studied</button></div><nav class="pager" aria-label="Chapter navigation"><a class="pv" href="not-yet-lectured.html"><small>← Previous</small><span>Extras</span></a><a class="nx" href="formulas.html"><small>Next →</small><span>Formulas</span></a></nav><footer>DASC7606 Deep Learning (Dr Bethany Chan &amp; Prof Francis Chin, 2026). Notes built from lecture slides 01–07 and past papers May 2024 – Dec 2025.</footer></main><script src="app.js"></script></body></html>

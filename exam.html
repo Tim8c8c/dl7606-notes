@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>How the exam works · DL7606</title><meta name="claude:viewport-fit-sides" content="cover"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;600&display=swap"><link rel="stylesheet" href="style.css"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body data-page="00"><header class="topbar"><div class="in"><a class="badge" href="index.html" aria-label="All chapters">DL·7606</a><span class="pt">00 · Exam guide</span><button class="ibtn" data-fs="-1" aria-label="Smaller text">A−</button><button class="ibtn" data-fs="1" aria-label="Larger text">A+</button></div><div class="progress"></div></header><main class="wrap"><header class="pagehead"><div class="tag">00 · Start here</div><h1>How the exam works<span class="zh">考試攻略</span></h1><p class="lede">Read this first. It shows the whole course on one map, what each past paper asked, and an order to revise in.</p><nav class="toc" aria-label="Sections"><a href="#s1"><b>01</b>Course map</a><a href="#s2"><b>02</b>Format</a><a href="#s3"><b>03</b>Topic heat map across past papers</a></nav></header><div class="callout tip"><div class="lab">Studying on the move</div><ul>
+<li>Each chapter is one page: read the mind map, then the numbered sections, then tap through the <b>Recall check</b> at the bottom.</li>
+<li>Tap <b>Mark this chapter as studied</b>; the home page shows your progress and quiz scores (saved on this phone only).</li>
+<li><b>A− / A+</b> in the top bar changes the text size. Wide diagrams and tables scroll sideways.</li>
+<li>Short on time? Use <a href="flashcards.html">Flashcards</a>. Have 2 hours? Sit a <a href="practice.html">practice paper</a>.</li></ul></div><section class="ch"><h3 id="s1"><span class="num">01</span>Course map<span class="zh">課程心智圖</span></h3>
+<div class="mm"><span class="root">Deep Learning 深度學習</span><div class="branches">
+<div class="br"><b>L1 Perspectives 概論</b><ul><li>Rule-based → ML → DL</li><li>Supervised learning</li><li>MSE · cross-entropy</li><li>Gradient descent</li><li>Logistic regression · softmax</li><li>Precision · recall · F1</li></ul></div>
+<div class="br"><b>L2 Neural nets 神經網絡</b><ul><li>Perceptron AND/OR/NOT</li><li>XOR needs a hidden layer</li><li>Universal approximator</li><li>Forward pass · backprop δ</li></ul></div>
+<div class="br"><b>L2–3 Training 訓練</b><ul><li>SGD · mini-batch</li><li>Vanishing gradient</li><li>σ · tanh · ReLU</li><li>Momentum · Adam</li><li>Dropout · early stopping · BatchNorm</li></ul></div>
+<div class="br"><b>L3–4 CNN 卷積</b><ul><li>M = (N+2P−F)/S + 1</li><li>Params · mults · LRF</li><li>AlexNet · VGG · GoogLeNet · ResNet</li></ul></div>
+<div class="br"><b>L4 Vision 視覺</b><ul><li>Occlusion · gradient ascent</li><li>Sliding windows → conv</li><li>R-CNN · YOLO · IoU · NMS</li><li>U-Net · FGSM</li></ul></div>
+<div class="br"><b>L5 NLP</b><ul><li>RNN · LSTM</li><li>CBOW · skip-gram · ELMo</li><li>Seq2seq · attention</li><li>Transformer, teacher forcing</li></ul></div>
+<div class="br new"><b>L6 Attention · BERT · size</b><ul><li>Q K V step by step, masks</li><li>DSA / MSA sparse attention</li><li>BERT MLM + NSP, fine-tuning</li><li>WordPiece · BART</li><li>4E² + 2EH parameter counts</li></ul></div>
+<div class="br new"><b>L7 LLM · GPT</b><ul><li>Language model chain rule</li><li>GPT-1/2/3, scaling, emergence</li><li>Greedy · beam · top-k/p · T</li><li>Perplexity · RLHF · ChatGPT</li></ul></div>
+<div class="br"><b>Not yet lectured</b><ul><li>GAN</li><li>LoRA · quantisation</li><li>Prompting (COSTAR)</li></ul></div>
+</div></div></section><section class="ch">
+ 
+ <h3 id="s2"><span class="num">02</span>Format<span class="zh">形式</span></h3><div class="grid2">
+  <div class="box"><h4>Format 形式</h4>
+   <ul><li>2 hours, 100 marks, all questions compulsory, answers written on the paper.</li>
+   <li>Calculator allowed (approved models). You will multiply big numbers: params and ops counts.</li>
+   <li>Your section (Chan &amp; Chin, subclasses A/B) asks <b>6–8 questions</b>: short explanations, fill-in tables, and 2–3 calculations.</li>
+   <li>Subclass C/D papers (a different lecturer) ask <b>3–4 long "construct the weights" puzzles</b>. Useful practice, but your paper will look like the A/B ones.</li></ul></div>
+  <div class="box"><h4>Where the marks went 分數分佈</h4>
+   <ul><li><b>CNN arithmetic</b> appears in every A/B paper: output size, parameter count, multiplication count, receptive field.</li>
+   <li><b>Attention by hand</b> (dot product → softmax → weighted sum) appears in 3 of 4 recent papers.</li>
+   <li><b>GAN</b> appeared in 3 of 4 A/B papers, each worth 12–20 marks.</li>
+   <li>2025 papers added <b>LLM topics</b>: LoRA, quantisation, hallucination, prompting.</li></ul></div>
+ </div>
+
+ <h3 id="s3"><span class="num">03</span>Topic heat map across past papers<span class="zh">歷屆考題熱度圖</span></h3>
+ <div class="legend"><span><i style="background:var(--heat0)"></i>not asked</span><span><i style="background:var(--heat1)"></i>1–9 marks</span><span><i style="background:var(--heat2)"></i>10–19</span><span><i style="background:var(--heat3)"></i>20+ marks</span><span>Numbers are approximate marks out of 100.</span></div>
+ <div class="tbl"><table class="heat">
+  <thead><tr><th style="text-align:left">Topic 主題</th><th>May 24<br>A/B/C</th><th>Dec 24<br>A/B/D</th><th>May 25</th><th>Dec 25<br>A/B</th><th>May 24<br>D*</th><th>Dec 24<br>C*</th><th>Dec 25<br>C*</th></tr></thead>
+  <tbody>
+  <tr><td class="topic">Perceptron &amp; logic gates 感知器</td><td class="h0">–</td><td class="h3">20</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td></tr>
+  <tr><td class="topic">Activation functions 激活函數</td><td class="h0">–</td><td class="h0">–</td><td class="h2">12</td><td class="h0">–</td><td class="h0">–</td><td class="h1">6</td><td class="h0">–</td></tr>
+  <tr><td class="topic">Loss, regularisation, gradient ascent 損失函數</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h2">18</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td></tr>
+  <tr><td class="topic">Backprop &amp; computation graph 反向傳播</td><td class="h2">10</td><td class="h2">15</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h3">27</td><td class="h0">–</td></tr>
+  <tr><td class="topic">Training problems &amp; optimisers 訓練問題</td><td class="h2">10</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h2">14</td><td class="h0">–</td><td class="h1">7</td></tr>
+  <tr><td class="topic">CNN size / params / ops 卷積計算</td><td class="h3">30</td><td class="h3">27</td><td class="h2">18</td><td class="h2">12</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td></tr>
+  <tr><td class="topic">Design CNN filters 設計卷積核</td><td class="h0">–</td><td class="h2">15</td><td class="h0">–</td><td class="h0">–</td><td class="h3">40</td><td class="h3">30</td><td class="h3">30</td></tr>
+  <tr><td class="topic">VGG / GoogLeNet / ResNet</td><td class="h0">–</td><td class="h0">–</td><td class="h1">6</td><td class="h0">–</td><td class="h0">–</td><td class="h1">7</td><td class="h0">–</td></tr>
+  <tr><td class="topic">Sliding windows, FC→conv 滑動窗口</td><td class="h1">9</td><td class="h2">12</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td></tr>
+  <tr><td class="topic">Visualisation, occlusion, adversarial 對抗</td><td class="h0">–</td><td class="h0">–</td><td class="h1">4</td><td class="h1">6</td><td class="h0">–</td><td class="h0">–</td><td class="h1">7</td></tr>
+  <tr><td class="topic">RNN / LSTM 循環神經網絡</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h3">46</td><td class="h0">–</td><td class="h3">30</td></tr>
+  <tr><td class="topic">Word embeddings, NLP training data 詞嵌入</td><td class="h0">–</td><td class="h0">–</td><td class="h2">10</td><td class="h2">12</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td></tr>
+  <tr><td class="topic">Attention by hand 注意力計算</td><td class="h3">30</td><td class="h0">–</td><td class="h0">–</td><td class="h2">18</td><td class="h0">–</td><td class="h0">–</td><td class="h3">20</td></tr>
+  <tr><td class="topic">Transformer concepts, masking 遮罩</td><td class="h0">–</td><td class="h3">23</td><td class="h1">8</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h1">7</td></tr>
+  <tr><td class="topic">GAN 生成對抗網絡</td><td class="h3">20</td><td class="h0">–</td><td class="h2">12</td><td class="h3">20</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td></tr>
+  <tr><td class="topic">LLM: hallucination, prompting 提示</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h3">20</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td></tr>
+  <tr><td class="topic">LLM size, quantisation, LoRA 量化</td><td class="h0">–</td><td class="h0">–</td><td class="h3">30</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td></tr>
+  <tr><td class="topic">Reinforcement learning 強化學習</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h0">–</td><td class="h3">30</td><td class="h0">–</td></tr>
+  </tbody></table></div>
+ <p style="font-size:13px;color:var(--muted)">* C/D-subclass papers, set by a different lecturer. One question can count towards two rows. "May 25" is the paper inside the file you named 2025_Dec3.</p>
+ <div class="callout exam"><div class="lab">Where lectures 6–7 hit past papers</div><ul><li>Attention arithmetic and masking (every year).</li><li>BERT training data, masking in BERT vs transformer (Dec 2025 Q4, May 2025 Q8).</li><li>Model size formula 2VE + L(4E² + 3EH + 2E) = the Llama formula from lecture 6 (May 2025 Q2).</li><li>Hallucination from next-word sampling (Dec 2025 Q6) = the long-tail argument from lecture 7.</li></ul></div>
+ <div class="callout tip"><div class="lab">Priority order 溫習優先次序</div>
+  <p>1. CNN arithmetic → 2. Attention by hand + transformer + BERT → 3. Decoding and LLM training (L7) 4. Backprop / vanishing gradient / skip connections → 5. GAN → 6. Model size, LoRA, quantisation → 7. Perceptron logic → 8. Visualisation &amp; adversarial.</p></div>
+</section><div class="donebar"><button class="donebtn">Mark this chapter as studied</button></div><nav class="pager" aria-label="Chapter navigation"><a class="pv" href="index.html"><small>← Back</small><span>All chapters</span></a><a class="nx" href="perspectives.html"><small>Next →</small><span>L1 Perspectives</span></a></nav><footer>DASC7606 Deep Learning (Dr Bethany Chan &amp; Prof Francis Chin, 2026). Notes built from lecture slides 01–07 and past papers May 2024 – Dec 2025.</footer></main><script src="app.js"></script></body></html>

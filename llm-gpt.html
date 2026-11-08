@@ -1,0 +1,190 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>LLMs and GPT · DL7606</title><meta name="claude:viewport-fit-sides" content="cover"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;600&display=swap"><link rel="stylesheet" href="style.css"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body data-page="08"><header class="topbar"><div class="in"><a class="badge" href="index.html" aria-label="All chapters">DL·7606</a><span class="pt">08 · L7 LLM &amp; GPT</span><button class="ibtn" data-fs="-1" aria-label="Smaller text">A−</button><button class="ibtn" data-fs="1" aria-label="Larger text">A+</button></div><div class="progress"></div></header><main class="wrap"><header class="pagehead"><div class="tag">08 · Lecture 7 · new</div><h1>LLMs and GPT<span class="zh">大型語言模型與 GPT</span></h1><p class="lede">Lecture 7: what a language model is, how GPT grew, how text is actually generated (greedy, beam, sampling, temperature), and how RLHF turned GPT-3 into ChatGPT.</p><nav class="toc" aria-label="Sections"><a href="#s1"><b>01</b>Language models</a><a href="#s2"><b>02</b>The GPT family</a><a href="#s3"><b>03</b>Generating the next word</a><a href="#s4"><b>04</b>Sampling, temperature and the long tail</a><a href="#s5"><b>05</b>Perplexity and watermarking</a><a href="#s6"><b>06</b>From baseline model to useful assistant</a><a href="#s7"><b>07</b>ChatGPT</a><a href="#recall"><b>✓</b>Recall check</a></nav></header><section class="ch">
+<div class="mm"><span class="root">L7 · LLM &amp; GPT</span><div class="branches">
+<div class="br"><b>Language model 語言模型</b><ul><li>P(S) = Π P(wᵢ | w₁…wᵢ₋₁)</li><li>Rule-based → statistical</li><li>Learns style too</li></ul></div>
+<div class="br"><b>GPT family</b><ul><li>Decoder only, unidirectional</li><li>GPT-1 fine-tune · GPT-2 zero-shot</li><li>GPT-3 few-shot, 175B</li><li>Scaling laws, emergence</li></ul></div>
+<div class="br"><b>Decoding 解碼</b><ul><li>Greedy · Beam search</li><li>Top-k · Top-p · ε</li><li>Temperature T</li><li>Perplexity</li><li>Watermarking</li></ul></div>
+<div class="br"><b>Making it useful</b><ul><li>Baseline = autocomplete</li><li>Fine-tuning</li><li>RLHF: SFT → RM → PPO</li><li>InstructGPT / GPT-3.5</li></ul></div>
+<div class="br"><b>ChatGPT</b><ul><li>Conversation fine-tuning</li><li>Helpful vs harmless</li><li>5 limitations</li><li>Data privacy</li></ul></div>
+<div class="br new"><b>Still to come (outline §14–15)</b><ul><li>LoRA</li><li>Prompting, in-context learning</li></ul></div>
+</div></div>
+
+<h3 id="s1"><span class="num">01</span>Language models<span class="zh">語言模型</span></h3>
+<ul>
+ <li>1970–80s: rule-based NLP by hand. 1990s: <b>statistical</b> inference of "validity" rules from large document collections.</li>
+ <li>A <b>language model</b> is a probabilistic model of word order: P("I love you") high, P("eat pen north") low. It picks up spelling (P("chulling") = 0), grammar ("one water" = 0, "two books"), and structure (subject–verb–object) from statistics.</li>
+ <li>It also learns <b>style</b>: train on all of Shakespeare and it writes Shakespeare; train on a CS textbook plus the Bible and you get a mix of both.</li>
+</ul>
+<div class="formula">P(S) = P(w₁w₂…wₙ) = P(w₁) · P(w₂|w₁) · P(w₃|w₁w₂) · … · P(wₙ|w₁…wₙ₋₁)
+Generation: next word ~ P(wₙ | w₁…wₙ₋₁)</div>
+<div class="tbl"><table><tr><th>2014</th><th>2017</th><th>2018</th><th>2018–20</th><th>2022</th><th>2022</th><th>2023</th><th>2025</th></tr>
+<tr><td>Seq2Seq</td><td>Transformer</td><td>ELMo, BERT</td><td>GPT-1, 2, 3</td><td>GPT-3.5</td><td>ChatGPT</td><td>GPT-4</td><td>GPT-5</td></tr></table></div>
+<p>Before GPT, models like BERT were pre-trained then <b>fine-tuned with supervised learning for each task</b>. Limits: needs lots of labelled data per task, and doesn't generalise to other tasks.</p>
+
+<h3 id="s2"><span class="num">02</span>The GPT family<span class="zh">GPT 系列</span></h3>
+<div class="grid2">
+ <div class="box"><h4>BERT vs GPT</h4><ul><li>GPT uses the <b>decoder</b> only → unidirectional, generates text.</li><li>BERT uses the <b>encoder</b> → bidirectional, builds representations.</li><li>Size: BERT-base 110M, BERT-large 340M; GPT-1 117M → GPT-2 1.5B → GPT-3 175B.</li><li>BERT and GPT-1 need task-specific fine-tuning; later GPTs are reprogrammed by <b>prompts</b> and few-shot examples.</li><li>Keys to success: <b>data</b> (predict the next word well) and <b>compute</b> (scale up).</li></ul></div>
+ <div class="box"><h4>What GPT does</h4><p>"Generative Pre-trained Transformer": compresses world knowledge through language modelling with a decoder-only transformer, memorises semantics of that knowledge, and becomes a general-purpose task solver.</p></div>
+</div>
+<div class="tbl wideT"><table>
+<tr><th>Model</th><th>Params</th><th>Layers</th><th>Embedding</th><th>Context</th><th>Heads</th><th>Key idea</th></tr>
+<tr><td>GPT-1 (2018)</td><td class="n">117M</td><td class="n">12</td><td class="n">768</td><td class="n">512</td><td class="n">12</td><td>Unsupervised pre-training on 7,000+ books, then supervised fine-tuning per task (start/end/delimiter tokens). 100 epochs pre-train, 3 fine-tune.</td></tr>
+<tr><td>GPT-2 (2019)</td><td class="n">1.5B</td><td class="n">48</td><td class="n">1600</td><td class="n">1024</td><td class="n">20</td><td>10× params, 10× data (40 GB). <b>No fine-tuning</b>: one model multitasks via P(output | input, task) → zero-shot transfer. Worse than fine-tuned SOTA. Perplexity improves with size: it <b>underfit</b>.</td></tr>
+<tr><td>GPT-3 (2020)</td><td class="n">175B</td><td class="n">96</td><td class="n">12,288*</td><td class="n">2048</td><td class="n">96</td><td><b>Few-shot learning</b> from examples in the prompt, no fine-tuning. ~500B tokens, 750+ GB text. Strong text completion: essays, summaries, QA, translation, code.</td></tr>
+</table></div>
+<p style="font-size:13px;color:var(--muted)">* The slide prints 12888; the published GPT-3 value is 12,288.</p>
+<div class="grid2">
+ <div class="box"><h4>Scaling laws (DeepMind 2022)</h4><p>Three ingredients: model scale <b>N</b> (params, layers, embedding size), dataset size <b>D</b>, compute budget <b>C</b>. Performance improves smoothly as each grows: a <b>power law</b>, loss ∝ (1/X)^α for X = N, D, C. Most LLMs are <b>under-trained</b>.</p></div>
+ <div class="box"><h4>Emergent abilities (Google 2022)</h4><p>An ability is emergent if it is <b>absent in smaller models but present in larger ones</b>. It's the most prominent feature of LLMs and raises "the larger the better?"</p></div>
+</div>
+
+<h3 id="s3"><span class="num">03</span>Generating the next word<span class="zh">生成下一個字</span></h3>
+<p>"Russia has declared war on the United States after Donald Trump accidentally fired…": the model embeds "Trump", attends to "Donald", "Russia", "declared war", and outputs a probability for every word (pressed 2.35%, fired 2.3%, …). The pick depends on attention and <b>temperature</b>. Longer context (GPT-3: 2048 tokens) gives more precise answers; early ChatGPT forgot long conversations.</p>
+<div class="formula">Goal (translation X → Y):   Y_best = argmax_Y P(Y | X)
+Two kinds of error:  the most probable output is bad → fix the MODEL
+                     the search misses the most probable output → fix the SEARCH
+Exhaustive search: Bˢ sentences (B branches, s = sentence length) → far too expensive</div>
+
+<div class="stepper">
+ <div class="sh"><b>Greedy vs beam search (lecture tree)</b><span class="cnt"></span><button class="ibtn" data-prev>← Prev</button><button class="ibtn" data-next>Next →</button></div>
+ <div class="step"><p>First word: <b>the 0.24</b>, I 0.20, give 0.10, …</p><div class="formula">Greedy takes "the" (highest).
+Beam (k = 3) keeps the, I, give.</div></div>
+ <div class="step"><p>Second word. After "the": nice 0.1, <b>cat 0.3</b>, dog 0.2. After "I": am 0.25, sit 0.05, <b>love 0.3</b>.</p><div class="formula">the cat  = 0.24 × 0.3  = 0.072      ← greedy path
+the dog  = 0.24 × 0.2  = 0.048
+I love   = 0.20 × 0.3  = 0.060
+I am     = 0.20 × 0.25 = 0.050
+the nice = 0.024
+Beam keeps the top 3: the cat, I love, I am (or the dog)</div></div>
+ <div class="step"><p>Third word. After "the cat": runs 0.3, wait 0.1, barks 0.05. After "I love": <b>you 0.4</b>.</p><div class="formula">Greedy:  the cat runs = 0.072 × 0.3 = 0.0216
+Beam:    I love you   = 0.060 × 0.4 = 0.0240   ← higher!</div><p>Greedy missed the best sentence because "I" was not the most likely <i>first</i> word. That is problem 1 of greedy decoding; problem 2 is that it prefers several common words over one rare word.</p></div>
+ <div class="step"><p>Beam search finishes each hypothesis at &lt;eos&gt;, shrinks the beam as hypotheses end, then compares complete sentences using a <b>length-normalised</b> score (longer sentences naturally have lower probability).</p></div>
+</div>
+<div class="grid2">
+ <div class="box"><h4>Greedy search 貪婪搜尋</h4><p><span class="m">y_j = argmax P(y_j | X, y₁…y_{j−1})</span>. Fast, but can miss Y_best and prefers common words.</p></div>
+ <div class="box"><h4>Beam search 集束搜尋</h4><p>Breadth-first: keep the top <b>k</b> (beam size) sequences at each step. Deterministic, good for accuracy (translation, summarisation), but low diversity and higher cost.</p></div>
+</div>
+
+<h3 id="s4"><span class="num">04</span>Sampling, temperature and the long tail<span class="zh">抽樣與溫度</span></h3>
+<p>Sampling <span class="m">y_j ~ P(y_j | X, y₁…y_{j−1})</span> adds diversity, but the <b>long tail</b> is a problem: each unlikely token has a tiny probability, yet together they add up, so sampling sometimes picks a wrong one. That leads to <b>hallucinations</b>. Fixes cut the tail:</p>
+<div class="tbl"><table>
+<tr><th>Method</th><th>Rule</th><th>Note</th></tr>
+<tr><td>Top-k</td><td>Sample only from the k most likely tokens (renormalised)</td><td>Fixed number of candidates</td></tr>
+<tr><td>Top-p (nucleus)</td><td>Smallest set of tokens whose cumulative probability exceeds p</td><td>Set size adapts to the distribution</td></tr>
+<tr><td>ε-sampling</td><td>Only tokens with probability ≥ ε</td><td>e.g. ε = 0.05</td></tr>
+<tr><td>Temperature T</td><td>z' = z/T, probs = softmax(z')</td><td>T &lt; 1 sharper (repetitive), T &gt; 1 flatter (creative, can be incoherent)</td></tr>
+</table></div>
+<div class="formula">Slide example, logits z₁ = 2, z₂ = 1:
+T = 0.5 → z' = 4, 2      → e⁴ = 54.6, e² = 7.39      → p = 0.881, 0.119
+T = 1   → z' = 2, 1      → e² = 7.39, e¹ = 2.72      → p = 0.731, 0.269
+T = 1.5 → z' = 1.33, 0.67 → e = 3.79, 1.95            → p = 0.661, 0.339</div>
+<div class="widget" id="lab">
+ <div class="wt">Sampling lab: "The cat sat on the ___"<small>try it</small></div>
+ <div class="wrow">
+  <div><label for="lT">Temperature T = <b id="lTv">1.0</b></label><input id="lT" type="range" min="0.1" max="2.5" step="0.1" value="1"></div>
+  <div><label for="lMode">Filter</label><select id="lMode"><option value="none">none (full sampling)</option><option value="k">top-k</option><option value="p">top-p</option><option value="e">ε-sampling</option></select></div>
+  <div><label for="lX">Setting = <b id="lXv">–</b></label><input id="lX" type="range" min="0" max="100" value="50"></div>
+ </div>
+ <div class="bars" id="lBars"></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="ibtn on" id="lGo">Sample 10 words</button><span class="out" id="lOut" style="flex:1;min-width:200px">Tap to draw samples.</span></div>
+</div>
+<div class="tbl"><table>
+<tr><th></th><th>Beam search</th><th>Top-k / top-p sampling</th></tr>
+<tr><td>Determinism</td><td>Deterministic (same output)</td><td>Stochastic (different outputs)</td></tr>
+<tr><td>Diversity</td><td>Low: safe, generic</td><td>High: diverse, creative</td></tr>
+<tr><td>Objective</td><td>Maximise sequence likelihood</td><td>Balance likelihood and randomness</td></tr>
+<tr><td>Cost</td><td>High (k sequences)</td><td>Low</td></tr>
+<tr><td>Use</td><td>Translation, summarisation</td><td>Storytelling, dialogue</td></tr>
+</table></div>
+
+<h3 id="s5"><span class="num">05</span>Perplexity and watermarking<span class="zh">困惑度與浮水印</span></h3>
+<p>To compare sentences of different lengths, normalise the probability with the <b>geometric mean</b> (because sentence probability is a product).</p>
+<div class="formula">p_norm(x₁…xₙ) = p(x₁…xₙ)^(1/n)                   higher is better
+Perplexity  PPL = 1 / p_norm = p(x₁…xₙ)^(−1/n)     LOWER is better
+
+e.g. word probabilities 0.5, 0.25, 0.2, 0.4 :  p = 0.01,  p_norm = 0.01^(1/4) = 0.316,  PPL = 3.16</div>
+<div class="widget" id="ppl">
+ <div class="wt">Perplexity calculator<small>try it</small></div>
+ <label for="pIn">Word probabilities, separated by commas</label>
+ <input id="pIn" type="text" value="0.5, 0.25, 0.2, 0.4" inputmode="decimal">
+ <div class="out" id="pOut"></div>
+</div>
+<p><b>Watermarking</b> (Claude, Aug 2026 per slides): random sampling uses a random-number generator; set its <b>seed from a secret key plus the preceding tokens</b>. Output quality is unchanged, but anyone with the key can re-run the choices and detect the pattern. Without the key it can't be detected, and editing words can remove it.</p>
+
+<h3 id="s6"><span class="num">06</span>From baseline model to useful assistant<span class="zh">由基礎模型到助手</span></h3>
+<ul>
+ <li>A baseline LLM is a <b>probability machine</b>: trained with loss ℒ = −log p_y to predict the next token from statistical patterns, not meaning. Coherent but "mostly useless": no reasoning, truthfulness or intent; it diverges and hallucinates. "LLMs are not intelligent, just statistical beasts."</li>
+ <li>Three steps, as for any ML model: (1) collect massive data, (2) pre-train a baseline (autocomplete), (3) <b>fine-tune</b> to make it useful (knowledge, factual consistency, human alignment). Fine-tuning needs a large human-labelled dataset; annotation is slow.</li>
+ <li>GPT-3's problems (not aligned with user intent): unhelpful (ignores instructions), hallucinations, poor interpretability, toxic or biased content.</li>
+</ul>
+<figure><div class="fig wideFig">
+<svg viewBox="0 0 760 220" width="760" role="img" aria-label="RLHF in three steps: supervised fine-tuning, reward model, reinforcement learning">
+ <defs><marker id="l7a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+ <g font-size="12.5">
+ <rect x="10" y="20" width="230" height="170" rx="12" class="nodeT"/><text x="125" y="44" text-anchor="middle" class="bold">Step 1 · SFT</text>
+ <text x="125" y="70" text-anchor="middle">Sample a prompt</text><text x="125" y="90" text-anchor="middle">Labeller writes the ideal</text><text x="125" y="108" text-anchor="middle">answer ("UK's capital is London")</text><text x="125" y="134" text-anchor="middle">Fine-tune GPT-3 on these</text><text x="125" y="152" text-anchor="middle" class="small">direct · few-shot · continuation</text><text x="125" y="170" text-anchor="middle" class="small">≤200 prompts per user</text>
+ <rect x="265" y="20" width="230" height="170" rx="12" class="nodeY"/><text x="380" y="44" text-anchor="middle" class="bold">Step 2 · Reward model</text>
+ <text x="380" y="70" text-anchor="middle">Model writes several answers</text><text x="380" y="90" text-anchor="middle">Humans RANK them (easier</text><text x="380" y="108" text-anchor="middle">than writing an answer)</text><text x="380" y="134" text-anchor="middle">Train RM: + for good,</text><text x="380" y="152" text-anchor="middle">− for bad responses</text><text x="380" y="172" text-anchor="middle" class="small">replaces slow, costly humans</text>
+ <rect x="520" y="20" width="230" height="170" rx="12" class="nodeS"/><text x="635" y="44" text-anchor="middle" class="bold">Step 3 · RL (PPO)</text>
+ <text x="635" y="70" text-anchor="middle">New prompt → policy writes</text><text x="635" y="90" text-anchor="middle">an answer → RM scores it</text><text x="635" y="116" text-anchor="middle">Update policy to raise</text><text x="635" y="134" text-anchor="middle">the reward</text><text x="635" y="160" text-anchor="middle" class="small">RM = simulated human</text><text x="635" y="176" text-anchor="middle" class="small">annotator</text>
+ <path d="M240 105 H261" class="edge" marker-end="url(#l7a)"/><path d="M495 105 H516" class="edge" marker-end="url(#l7a)"/>
+ <text x="380" y="210" text-anchor="middle" class="small">InstructGPT / GPT-3.5 (2022) = GPT-3 fine-tuned with RLHF (reinforcement learning from human feedback)</text>
+ </g>
+</svg></div></figure>
+<p>RLHF incorporates human expertise, reduces untruthful and toxic output and hallucination, and <b>aligns</b> the model with users. It is labour-intensive.</p>
+
+<h3 id="s7"><span class="num">07</span>ChatGPT<span class="zh">ChatGPT</span></h3>
+<div class="grid2">
+ <div class="box"><h4>How it was built</h4><ul><li>Based on GPT-3 (175B, 96 layers, 96 heads, context 2048) and InstructGPT. Slides give ChatGPT itself as ~20B params, embedding 1536, input size 8192.</li><li><b>Conversation-protocol fine-tuning</b>: special tokens like &lt;|im_start|&gt;, &lt;|im_end|&gt; mark turns ("User: … Assistant: …"). Plain next-word prediction would just continue your text.</li><li>Steps: (1) InstructGPT with RLHF; (2) human trainers write dialogues using model suggestions; (3) mix that dialogue data with InstructGPT data.</li><li>1M users in 5 days; 100M monthly users in 2 months (TikTok took 9).</li></ul></div>
+ <div class="box"><h4>Embedding + decoder</h4><p>Input embedding learns the meaning and relationships of the input words (large embedding, many heads). The decoder generates fluent text (needs a large model, lots of data and a good input embedding).</p><h4>Helpfulness vs harmlessness</h4><p>Push helpfulness → more harmful outputs. Push harmlessness → refuses more, less helpful. Needs a balance.</p></div>
+</div>
+<div class="tbl"><table><tr><th>#</th><th>ChatGPT limitations (slides)</th></tr>
+<tr><td>1</td><td>Plausible but wrong answers (hallucination): RL has no source of truth; more caution declines correct answers; trained on available data, not what humans know.</td></tr>
+<tr><td>2</td><td>Sensitive to rephrasing or repeating the same prompt.</td></tr>
+<tr><td>3</td><td>Verbose, overuses phrases (trainers preferred longer answers).</td></tr>
+<tr><td>4</td><td>Guesses intent instead of asking for clarification.</td></tr>
+<tr><td>5</td><td>May follow harmful instructions or show bias.</td></tr></table></div>
+<p><b>Data privacy</b>: Jasper AI built a copywriting service on OpenAI's API. Prompts sent to the API were recorded; ChatGPT got better at emails and essays, and users switched to ChatGPT. Lesson: what you send to an LLM API can be used.</p>
+<div class="callout future"><div class="lab">Background on the slides (unlikely to be examined)</div><p>OpenAI: founded 2015–16 with Elon Musk, capped-profit from 2019, partners Microsoft and Nvidia, products DALL·E, Sora, Whisper. Anthropic: founded 2020–21 by Dario and Daniela Amodei and colleagues from OpenAI, focused on safety (interpretability, Constitutional AI, "helpful, harmless, honest"), a public benefit corporation. The slides also list lawsuits and funding figures.</p></div>
+<div class="callout zhbox"><div class="lab">中文重點</div>
+<p>語言模型：P(S) = 各字條件機率相乘。GPT 只用解碼器（單向生成）；BERT 只用編碼器（雙向理解）。GPT-1 預訓練＋每項任務微調；GPT-2 零樣本、多任務；GPT-3 少樣本學習、1750 億參數。規模定律：模型大小 N、數據 D、算力 C 增加，表現按冪律改善；湧現能力只在大模型出現。解碼：貪婪搜尋可能錯過最佳句子；集束搜尋保留 k 個候選；Top-k、Top-p、ε 抽樣切走長尾以減少幻覺；溫度 T 細 → 分佈尖、輸出重複，T 大 → 分佈平、較有創意但可能不連貫。困惑度 = p^(−1/n)，越低越好。RLHF 三步：監督微調、獎勵模型（人類排序）、強化學習。ChatGPT 要平衡有用與無害。</p></div>
+<div class="callout exam"><div class="lab">Likely exam questions</div><ul>
+ <li>Greedy vs beam on a probability tree; which sentence each picks and why they differ.</li>
+ <li>Apply top-k / top-p / ε / temperature to a distribution; effect of T &lt; 1 vs T &gt; 1.</li>
+ <li>Compute perplexity; explain why the geometric mean is used.</li>
+ <li>Why LLMs hallucinate (long tail + sampling, no source of truth) and how to reduce it (Dec 2025 Q6).</li>
+ <li>RLHF steps and why a reward model; GPT vs BERT; GPT-1/2/3 differences; scaling laws and emergence.</li></ul></div>
+</section>
+
+<script>
+(function(){
+ var W=['mat','couch','floor','rug','bed','moon'],P0=[0.40,0.25,0.15,0.10,0.06,0.04];
+ var Z=P0.map(function(p){return Math.log(p);});
+ var T=document.getElementById('lT'),Tv=document.getElementById('lTv'),M=document.getElementById('lMode'),X=document.getElementById('lX'),Xv=document.getElementById('lXv'),B=document.getElementById('lBars'),O=document.getElementById('lOut');
+ var cur=[];
+ function setting(){var m=M.value,x=+X.value/100;if(m==='k')return Math.max(1,Math.round(1+x*5));if(m==='p')return Math.round((0.3+x*0.7)*100)/100;if(m==='e')return Math.round(x*0.2*100)/100;return null;}
+ function draw(){
+  var t=+T.value;Tv.textContent=t.toFixed(1);
+  var e=Z.map(function(z){return Math.exp(z/t);}),s=e.reduce(function(a,b){return a+b;},0),p=e.map(function(v){return v/s;});
+  var m=M.value,v=setting();Xv.textContent=m==='none'?'–':(m==='k'?'k = '+v:(m==='p'?'p = '+v:'ε = '+v));X.disabled=(m==='none');
+  var idx=p.map(function(x,i){return i;}).sort(function(a,b){return p[b]-p[a];}),keep={};
+  if(m==='none')idx.forEach(function(i){keep[i]=1;});
+  if(m==='k')idx.slice(0,v).forEach(function(i){keep[i]=1;});
+  if(m==='p'){var c=0;for(var j=0;j<idx.length;j++){keep[idx[j]]=1;c+=p[idx[j]];if(c>v-1e-9)break;}}
+  if(m==='e')idx.forEach(function(i){if(p[i]>=v)keep[i]=1;});
+  if(!Object.keys(keep).length)keep[idx[0]]=1;
+  var ks=0;for(var i in keep)ks+=p[i];
+  cur=W.map(function(w,i){return keep[i]?p[i]/ks:0;});
+  B.innerHTML=W.map(function(w,i){var on=!!keep[i];return '<div class="r'+(on?'':' off')+'"><span>'+w+'</span><span class="t"><i style="width:'+(p[i]*100).toFixed(1)+'%"></i></span><span class="v">'+(on?(cur[i]*100).toFixed(1)+'%':'cut')+'</span></div>';}).join('')+'<div style="font-size:12px;color:var(--muted)">Bar = probability after temperature; number = probability actually sampled (after filter, renormalised).</div>';
+ }
+ function sample(){var out=[];for(var n=0;n<10;n++){var r=Math.random(),c=0;for(var i=0;i<W.length;i++){c+=cur[i];if(r<=c){out.push(W[i]);break;}}if(out.length<n+1)out.push(W[0]);}O.textContent=out.join(' · ');}
+ [T,M,X].forEach(function(el){el.addEventListener('input',draw);});M.addEventListener('change',draw);
+ document.getElementById('lGo').addEventListener('click',sample);
+ draw();
+ var pi=document.getElementById('pIn'),po=document.getElementById('pOut');
+ function ppl(){var a=(pi.value||'').split(/[ ,]+/).map(parseFloat).filter(function(x){return x>0&&x<=1;});
+  if(!a.length){po.textContent='Enter probabilities between 0 and 1.';return;}
+  var lp=a.reduce(function(s,x){return s+Math.log(x);},0),P=Math.exp(lp),pn=Math.exp(lp/a.length);
+  po.textContent='n = '+a.length+'\np(sentence) = '+P.toPrecision(4)+'\np_norm = p^(1/n) = '+pn.toFixed(4)+'\nperplexity = 1/p_norm = '+(1/pn).toFixed(4)+'\nArithmetic mean would be '+(a.reduce(function(s,x){return s+x;},0)/a.length).toFixed(4)+' (not used).';}
+ pi.addEventListener('input',ppl);ppl();
+})();
+</script>
+<section class="recall" id="recall"><h2>Recall check<span class="zh">即時測驗</span></h2><p class="qscore"></p><div class="mcq"><p class="qq">GPT uses which part of the transformer?</p><div class="opts"><button class="o">encoder only</button><button class="o" data-ok>decoder only</button><button class="o">both</button><button class="o">neither</button></div><div class="exp">Unidirectional generation.</div></div><div class="mcq"><p class="qq">GPT-2&#x27;s main idea was…</p><div class="opts"><button class="o">few-shot prompts</button><button class="o" data-ok>zero-shot multitask without fine-tuning</button><button class="o">RLHF</button><button class="o">masked LM</button></div><div class="exp">P(output | input, task).</div></div><div class="mcq"><p class="qq">Greedy decoding can miss the best sentence because…</p><div class="opts"><button class="o">it&#x27;s random</button><button class="o" data-ok>a lower-probability first word can lead to a higher-probability sentence</button><button class="o">it uses beams</button><button class="o">it ignores the model</button></div><div class="exp">Lecture: &#x27;the cat runs&#x27; 0.0216 vs &#x27;I love you&#x27; 0.024.</div></div><div class="mcq"><p class="qq">Top-p = 0.75 on probs 0.40, 0.25, 0.15, 0.10 … keeps…</p><div class="opts"><button class="o">1 token</button><button class="o">2 tokens</button><button class="o" data-ok>3 tokens</button><button class="o">all tokens</button></div><div class="exp">Cumulative 0.40, 0.65, 0.80: three tokens first exceed 0.75.</div></div><div class="mcq"><p class="qq">Lowering temperature T below 1…</p><div class="opts"><button class="o">flattens the distribution</button><button class="o" data-ok>sharpens it (more repetitive)</button><button class="o">has no effect</button><button class="o">removes the top token</button></div><div class="exp">z/T makes gaps bigger.</div></div><div class="mcq"><p class="qq">Perplexity is…</p><div class="opts"><button class="o">p^(1/n), higher is better</button><button class="o" data-ok>p^(−1/n), lower is better</button><button class="o">arithmetic mean of probabilities</button><button class="o">the number of words</button></div><div class="exp">Geometric-mean normalised probability, inverted.</div></div><div class="mcq"><p class="qq">In RLHF, the reward model is trained on…</p><div class="opts"><button class="o">human-written answers</button><button class="o" data-ok>human rankings of model outputs</button><button class="o">random labels</button><button class="o">perplexity</button></div><div class="exp">Ranking two outputs is easier than writing the ideal answer.</div></div><div class="mcq"><p class="qq">An emergent ability is one that…</p><div class="opts"><button class="o">all models have</button><button class="o" data-ok>appears only in larger models</button><button class="o">disappears with scale</button><button class="o">is trained explicitly</button></div><div class="exp">Google 2022.</div></div><p style="margin-top:12px"><button class="ibtn" data-reset-quiz>Reset quiz</button></p></section><div class="donebar"><button class="donebtn">Mark this chapter as studied</button></div><nav class="pager" aria-label="Chapter navigation"><a class="pv" href="bert-size.html"><small>← Previous</small><span>L6 BERT &amp; size</span></a><a class="nx" href="not-yet-lectured.html"><small>Next →</small><span>Extras</span></a></nav><footer>DASC7606 Deep Learning (Dr Bethany Chan &amp; Prof Francis Chin, 2026). Notes built from lecture slides 01–07 and past papers May 2024 – Dec 2025.</footer></main><script src="app.js"></script></body></html>

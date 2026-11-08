@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Asked before, not yet lectured · DL7606</title><meta name="claude:viewport-fit-sides" content="cover"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;600&display=swap"><link rel="stylesheet" href="style.css"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body data-page="09"><header class="topbar"><div class="in"><a class="badge" href="index.html" aria-label="All chapters">DL·7606</a><span class="pt">09 · Extras</span><button class="ibtn" data-fs="-1" aria-label="Smaller text">A−</button><button class="ibtn" data-fs="1" aria-label="Larger text">A+</button></div><div class="progress"></div></header><main class="wrap"><header class="pagehead"><div class="tag">09 · Past-paper topics</div><h1>Asked before, not yet lectured<span class="zh">歷屆有考、未教課題</span></h1><p class="lede">Topics your section examined in 2024–2025 that the slides haven't reached yet. Same exam weight, so don't skip them.</p><nav class="toc" aria-label="Sections"><a href="#s1"><b>01</b>Generative adversarial networks (GAN)</a><a href="#s2"><b>02</b>NLP training data from one paragraph</a><a href="#s3"><b>03</b>Hallucination and prompting</a><a href="#s4"><b>04</b>Making LLMs smaller and cheaper</a><a href="#recall"><b>✓</b>Recall check</a></nav></header><section class="ch">
+ 
+ <div class="callout future"><div class="lab">Status</div><p>Lectures 6–7 now cover BERT, model size, GPT, decoding and RLHF, so those moved to their own chapters. What remains here was tested in past papers but isn't in your slides yet. LoRA and prompting are listed as sections 14–15 in the lecture 7 outline, so expect them next. Check these notes against the slides when they arrive.</p></div>
+
+ <h3 id="s1"><span class="num">01</span>Generative adversarial networks (GAN)<span class="zh">生成對抗網絡</span></h3>
+ <figure><div class="fig">
+ <svg viewBox="0 0 760 210" width="760" role="img" aria-label="GAN: noise to generator to fake image, discriminator judges real vs fake">
+  <defs><marker id="arC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <g font-size="12.5">
+  <rect x="10" y="130" width="110" height="40" rx="6" class="node"/><text x="65" y="148" text-anchor="middle">random noise z</text><text x="65" y="163" text-anchor="middle" class="small">(latent vector)</text>
+  <rect x="160" y="130" width="120" height="40" rx="6" class="nodeT"/><text x="220" y="148" text-anchor="middle" class="bold">Generator G</text><text x="220" y="163" text-anchor="middle" class="small">生成器</text>
+  <rect x="320" y="130" width="110" height="40" rx="6" class="nodeY"/><text x="375" y="155" text-anchor="middle">fake image G(z)</text>
+  <rect x="320" y="40" width="110" height="40" rx="6" class="node"/><text x="375" y="65" text-anchor="middle">real image x</text>
+  <rect x="480" y="85" width="130" height="40" rx="6" class="nodeR"/><text x="545" y="103" text-anchor="middle" class="bold">Discriminator D</text><text x="545" y="118" text-anchor="middle" class="small">判別器</text>
+  <rect x="650" y="85" width="100" height="40" rx="6" class="node"/><text x="700" y="103" text-anchor="middle">P(real)</text><text x="700" y="118" text-anchor="middle" class="small">∈ [0, 1]</text>
+  <path d="M120 150 H156" class="edge" marker-end="url(#arC)"/><path d="M280 150 H316" class="edge" marker-end="url(#arC)"/>
+  <path d="M430 150 L476 115" class="edge" marker-end="url(#arC)"/><path d="M430 60 L476 95" class="edge" marker-end="url(#arC)"/><path d="M610 105 H646" class="edge" marker-end="url(#arC)"/>
+  <path d="M700 125 V195 H220 V174" class="edgeR" marker-end="url(#arC)"/>
+  <text x="460" y="190" fill="var(--rose)">gradient through D tells G how to look more real</text>
+  </g>
+ </svg></div></figure>
+ <div class="tbl"><table><tr><th>Component</th><th>Function</th><th>Input</th><th>Output</th></tr>
+ <tr><td>Generator G</td><td>Create realistic synthetic samples to fool D (a counterfeiter)</td><td>Random noise vector z (plus a label for conditional GAN)</td><td>Synthetic sample, e.g. an image</td></tr>
+ <tr><td>Discriminator D</td><td>Tell real from fake (the police); binary classifier</td><td>A real or generated sample</td><td>Probability the input is real</td></tr></table></div>
+ <div class="formula">Loss: binary cross-entropy (= binary logistic loss)
+  min_G max_D   E[log D(x)] + E[log(1 − D(G(z)))]
+
+D training:   real x  → target 1 :  loss = −log D(x)
+              fake    → target 0 :  loss = −log(1 − D(G(z)))
+G training:   fake    → target 1 :  loss = −log D(G(z))     (D frozen; gradient flows through D into G)</div>
+ <div class="grid2">
+  <div class="box"><h4>Real image, D outputs 0.7</h4><p>Only D learns from it (G was not involved). Target 1, loss = −ln 0.7 = 0.357. Backprop pushes D's output towards 1.</p></div>
+  <div class="box"><h4>Fake image, D outputs 0.4 (or 0.2)</h4><p><b>D step</b>: target 0, loss = −ln(1 − 0.4) = 0.511; push towards 0. <b>G step</b>: freeze D, target 1, loss = −ln 0.4 = 0.916; update G's weights so D's score rises. For 0.2: D loss 0.223, G loss 1.609 (G is losing badly, big gradient).</p></div>
+ </div>
+ <ul>
+  <li><b>Training</b> alternates: train D for a step (or k steps) on real + fake, then train G with D frozen. With a generated sample, either G or D is trained in a given step: D with target 0, G with target 1.</li>
+  <li><b>Challenges</b>: mode collapse (G produces few varieties); non-convergence / oscillation; vanishing gradient when D becomes too good; balancing D and G; no simple metric of quality; sensitive to hyper-parameters; high compute.</li>
+  <li><b>Variation of samples</b> comes from the random input z (and the label in a conditional GAN). Mode collapse is the failure of variation.</li>
+  <li><b>Turing-test analogy</b>: D plays the interrogator, G the machine. G succeeds when D can't do better than guess (outputs 0.5 everywhere).</li>
+  <li><b>Colourising B/W photos</b>: a conditional GAN (pix2pix-style) with an encoder–decoder (U-Net) generator. Input greyscale, output colour; skip connections keep edges sharp; D judges whether the colour looks plausible.</li>
+ </ul>
+
+ <h3 id="s2"><span class="num">02</span>NLP training data from one paragraph<span class="zh">由一段文字造訓練數據</span></h3>
+ <p>Dec 2025 Q4 gave a paragraph and asked for one training example per task. BERT itself is covered in <a href="bert-size.html">chapter 07</a>.</p>
+ <div class="tbl"><table><tr><th>Task</th><th>Input</th><th>Prediction</th></tr>
+ <tr><td>Next-word prediction (GPT-style LM)</td><td>"Cats are great pets because they"</td><td>"can"</td></tr>
+ <tr><td>CBOW (window 2)</td><td>{great, pets, they, can}</td><td>"because"</td></tr>
+ <tr><td>Skip-gram (window 2)</td><td>"because"</td><td>great, pets, they, can (each a separate pair)</td></tr>
+ <tr><td>BERT next sentence prediction (NSP)</td><td>[CLS] Cats are great pets because they can take care of themselves. [SEP] They don't need walks like dogs do… [SEP]</td><td>IsNext (and a random sentence pair → NotNext)</td></tr>
+ <tr><td>BERT masked LM (15%)</td><td>"Cats are great [MASK] because they can take [MASK] of themselves"</td><td>pets, care</td></tr>
+ <tr><td>BERT question answering</td><td>Question: "Why are cats perfect for Hong Kong people?" + the paragraph</td><td>Start/end span: "fit well in small homes"</td></tr></table></div>
+ <p>Of the 15% chosen tokens, 80% become [MASK], 10% a random word, 10% stay unchanged, so the model can't rely on seeing [MASK] at test time.</p>
+ <div class="grid2">
+  <div class="box"><h4>Masking in the Transformer</h4><p>Decoder self-attention uses a look-ahead mask: set scores to −∞ for future positions before softmax, so word i only sees words ≤ i. Also padding masks ignore pad tokens.</p></div>
+  <div class="box"><h4>Masking in BERT</h4><p>Training objective: hide 15% of input tokens and predict them from <b>both</b> sides of context. No look-ahead mask, which is why BERT is bidirectional.</p></div>
+ </div>
+
+ <h3 id="s3"><span class="num">03</span>Hallucination and prompting<span class="zh">幻覺與提示</span></h3>
+ <p>Lecture 7 explains the sampling side of hallucination (the long tail); see <a href="llm-gpt.html">chapter 08</a>.</p>
+ <div class="grid2">
+  <div class="box"><h4>Why hallucinations happen 幻覺成因</h4><ul><li>The model predicts a <b>plausible</b> next token, not a true one; nothing checks facts.</li><li>Sampling from the distribution can pick a low-probability wrong token, and each later token builds on it (errors compound).</li><li>Training data is incomplete, outdated or contradictory; rare facts get low probability mass.</li><li>The model is trained to always answer, not to say "I don't know".</li></ul></div>
+  <div class="box"><h4>How to reduce them</h4><ul><li><b>Retrieval-augmented generation (RAG)</b>: fetch trusted documents and answer from them, with citations.</li><li>Lower temperature / greedy or top-k decoding.</li><li>Fine-tuning / RLHF that rewards "I don't know" and factuality.</li><li>Prompting: ask for sources, chain-of-thought, self-consistency checks; human or tool verification.</li></ul></div>
+ </div>
+ <div class="tbl"><table><tr><th>COSTAR prompt framework</th><th>Meaning</th><th>In the Dec 2025 cat essay prompt</th></tr>
+ <tr><td><b>C</b>ontext</td><td>Background / role</td><td>✓ "first-year creative writing student, persuasive essay"</td></tr>
+ <tr><td><b>O</b>bjective</td><td>The task</td><td>✓ persuade readers cats are better companions than dogs</td></tr>
+ <tr><td><b>S</b>tyle</td><td>Writing style</td><td>✓ descriptive, specific examples and anecdotes</td></tr>
+ <tr><td><b>T</b>one</td><td>Attitude</td><td>✓ informal and humorous</td></tr>
+ <tr><td><b>A</b>udience</td><td>Who reads it</td><td>✓ pet owners and people considering adoption</td></tr>
+ <tr><td><b>R</b>esponse</td><td>Output format</td><td>✗ missing. Add e.g. "Write about 600 words with a title, an introduction, three body paragraphs and a conclusion."</td></tr></table></div>
+
+ <h3 id="s4"><span class="num">04</span>Making LLMs smaller and cheaper<span class="zh">模型壓縮：蒸餾、量化、LoRA</span></h3>
+ <div class="formula">Parameter count (May 2025):   P ≈ 2VE + L(4E² + 3EH + 2E)
+   2VE      = input + output embedding        4E² = W_Q, W_K, W_V, W_O
+   3EH      = MLP (gate, up, down)             2E  = layer-norm weights
+   V=32000, L=40, E=5120, H=13824  ⇒  P ≈ 13.0 B   (MLP 3EH dominates: ~8.5 B)
+
+Memory to store weights = params × bits / 8
+   70 B × 4 bit = 35 GB      70 B × 16 bit = 140 GB      13 B × 8 bit = 13 GB
+
+LoRA:  ΔW (d×k) ≈ A (d×r) · B (r×k)       trainable params r(d + k) instead of dk
+   four E×E matrices:  4E² → 4·2Er ;  reduction factor E/(2r) ≥ 1000  ⇒ r ≤ E/2000
+   two E×H matrices:   2EH → 2r(E+H) ; factor EH/(r(E+H)) ≥ 1000</div>
+ <ul>
+  <li><b>Distillation</b> to halve the size: changing L (layers ≈ halve), E or H can each do it; V cannot (2VE is only ~0.3 B of 13 B). E is the hardest to change: it fixes the shape of every matrix and the embeddings, so the whole model must be retrained.</li>
+  <li><b>Quantisation 量化</b>: map each weight to the nearest of 2ᵇ levels. For normally distributed weights, put more levels near 0 (NF4-style table) to minimise average error; a uniform table wastes levels in the rarely-used tails.</li>
+  <li><b>LoRA advantages</b>: efficient training (few trainable params, less GPU memory), swap small adapters to serve multiple tasks, base model frozen (less forgetting). The choice of r trades training GPU memory against fine-tuned quality and depends on how much fine-tuning data there is.</li>
+ </ul>
+ <div class="callout zhbox"><div class="lab">中文重點</div>
+  <p>GAN：生成器由噪聲生成假樣本，判別器分辨真假，兩者輪流訓練；常見問題是模式崩潰 (mode collapse)、不收斂、梯度消失。BERT 用遮罩語言模型 (15%) 和下一句預測預訓練。LLM 幻覺源於「預測合理的下一個字」而非事實；可用 RAG、降低溫度、微調減少。量化：參數 × 位元 ÷ 8 = 位元組。LoRA 用兩個低秩矩陣 A×B 取代 ΔW，參數由 d·k 減至 r(d+k)。</p></div>
+</section><section class="recall" id="recall"><h2>Recall check<span class="zh">即時測驗</span></h2><p class="qscore"></p><div class="mcq"><p class="qq">A real image gets D(x) = 0.7. Who trains, target, loss?</p><div class="opts"><button class="o">G, target 1, −ln 0.7</button><button class="o" data-ok>D, target 1, −ln 0.7</button><button class="o">D, target 0, −ln 0.3</button><button class="o">both, target 0.5</button></div><div class="exp">Only D sees real data; loss 0.357.</div></div><div class="mcq"><p class="qq">Mode collapse means…</p><div class="opts"><button class="o">D always outputs 0.5</button><button class="o" data-ok>G produces only a few kinds of output</button><button class="o">training is too fast</button><button class="o">gradients explode</button></div><div class="exp">G found a few outputs that fool D and ignores z&#x27;s variety.</div></div><div class="mcq"><p class="qq">70B parameters at 4 bits need about…</p><div class="opts"><button class="o">17.5 GB</button><button class="o" data-ok>35 GB</button><button class="o">70 GB</button><button class="o">140 GB</button></div><div class="exp">70e9 × 0.5 bytes.</div></div><div class="mcq"><p class="qq">LoRA replaces ΔW (d×k) with A (d×r)·B (r×k). Trainable parameters:</p><div class="opts"><button class="o">dk</button><button class="o" data-ok>r(d + k)</button><button class="o">r²</button><button class="o">d + k</button></div><div class="exp">Huge saving when r is small.</div></div><div class="mcq"><p class="qq">Which COSTAR letter means the output format?</p><div class="opts"><button class="o">C</button><button class="o">O</button><button class="o">A</button><button class="o" data-ok>R (Response)</button></div><div class="exp">Context, Objective, Style, Tone, Audience, Response.</div></div><p style="margin-top:12px"><button class="ibtn" data-reset-quiz>Reset quiz</button></p></section><div class="donebar"><button class="donebtn">Mark this chapter as studied</button></div><nav class="pager" aria-label="Chapter navigation"><a class="pv" href="llm-gpt.html"><small>← Previous</small><span>L7 LLM &amp; GPT</span></a><a class="nx" href="solved.html"><small>Next →</small><span>Past Qs solved</span></a></nav><footer>DASC7606 Deep Learning (Dr Bethany Chan &amp; Prof Francis Chin, 2026). Notes built from lecture slides 01–07 and past papers May 2024 – Dec 2025.</footer></main><script src="app.js"></script></body></html>

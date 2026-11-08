@@ -1,0 +1,300 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Attention, BERT and model size · DL7606</title><meta name="claude:viewport-fit-sides" content="cover"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;600&display=swap"><link rel="stylesheet" href="style.css"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body data-page="07"><header class="topbar"><div class="in"><a class="badge" href="index.html" aria-label="All chapters">DL·7606</a><span class="pt">07 · L6 BERT &amp; size</span><button class="ibtn" data-fs="-1" aria-label="Smaller text">A−</button><button class="ibtn" data-fs="1" aria-label="Larger text">A+</button></div><div class="progress"></div></header><main class="wrap"><header class="pagehead"><div class="tag">07 · Lecture 6 · new</div><h1>Attention, BERT and model size<span class="zh">注意力、BERT、模型大小</span></h1><p class="lede">Lecture 6 takes the transformer apart: attention step by step with masks, sparse attention, why it beats LSTMs, BERT and tokenization, and how to count a model's parameters. Three interactive widgets inside.</p><nav class="toc" aria-label="Sections"><a href="#s1"><b>01</b>Revision: from RNN to attention</a><a href="#s2"><b>02</b>Attention, step by step</a><a href="#s3"><b>03</b>Sparse attention: DSA and MSA</a><a href="#s4"><b>04</b>Feed-forward block and why transformers work</a><a href="#s5"><b>05</b>BERT</a><a href="#s6"><b>06</b>Tokenization</a><a href="#s7"><b>07</b>BART and the three model families</a><a href="#s8"><b>08</b>Model size: counting parameters</a><a href="#recall"><b>✓</b>Recall check</a></nav></header><section class="ch">
+<div class="mm"><span class="root">L6 · Transformer → BERT → Size</span><div class="branches">
+<div class="br"><b>Attention step by step</b><ul><li>Q = XW_Q, K = XW_K, V = XW_V</li><li>QKᵀ → ÷√d → softmax → ×V</li><li>Multi-head: d = E / heads</li><li>Masks: padding, look-ahead</li></ul></div>
+<div class="br"><b>Efficient attention</b><ul><li>DeepSeek DSA: top-k tokens</li><li>MiniMax MSA: top-k blocks</li><li>O(L²) → O(Lk)</li></ul></div>
+<div class="br"><b>Why transformers win</b><ul><li>Variable-size embedding</li><li>Direct token interaction</li><li>Parallel</li><li>Feed-forward block</li></ul></div>
+<div class="br"><b>BERT 雙向編碼器</b><ul><li>Encoder only</li><li>Masked LM 15% · NSP</li><li>[CLS] [SEP], 3 embeddings</li><li>Fine-tune: classify, NER, QA</li><li>WordPiece tokens</li></ul></div>
+<div class="br"><b>Model families</b><ul><li>GPT = decoder only</li><li>BERT = encoder only</li><li>BART = encoder–decoder</li></ul></div>
+<div class="br"><b>Model size 參數量</b><ul><li>Attention 4E²</li><li>FFN 2EH (Llama 3EH)</li><li>Encoder 4E²+2EH, decoder 8E²+2EH</li><li>GPT-2 124M · Llama-2 13B</li></ul></div>
+</div></div>
+
+<h3 id="s1"><span class="num">01</span>Revision: from RNN to attention<span class="zh">溫故：由 RNN 到注意力</span></h3>
+<ul>
+ <li>RNN: s_t = g(Wx_t + Us_{t−1}), y_t = g(Vs_t). Any input length with a fixed model size. Variants: LSTM, stacked, bidirectional. Uses: NER (many-to-many), sentiment (many-to-one), language model (one-to-many), translation (many-to-many).</li>
+ <li><b>Word embedding</b>: a learned real-valued vector encoding a word's meaning, so words close in the vector space have similar meanings (features like royalty, gender, wealth, age). Built by CBOW / Skip-gram; ELMo gives context-sensitive vectors. Vector-space models also power recommenders (Taobao) and search (SMART).</li>
+ <li><b>Seq2Seq attention</b> (the bridge to Q, K, V): the decoder state s_{t−1} is the <b>query</b>, the encoder states hᵢ are the <b>keys</b> and <b>values</b>. e_ti = a(s_{t−1}, hᵢ), α_ti = softmax(e_ti), context c_t = Σ α_ti hᵢ.</li>
+</ul>
+
+<h3 id="s2"><span class="num">02</span>Attention, step by step<span class="zh">注意力四步曲</span></h3>
+<figure><div class="fig wideFig">
+<svg viewBox="0 0 760 210" width="760" role="img" aria-label="Attention pipeline: embeddings times three weight matrices give Q K V, then QK transpose, scale, softmax, times V">
+ <defs><marker id="l6a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+ <g font-size="12.5">
+ <rect x="10" y="80" width="90" height="50" rx="8" class="node"/><text x="55" y="101" text-anchor="middle">X</text><text x="55" y="118" text-anchor="middle" class="small mono">N × E</text>
+ <rect x="150" y="20" width="90" height="40" rx="8" class="nodeT"/><text x="195" y="45" text-anchor="middle">Q = XW_Q</text>
+ <rect x="150" y="85" width="90" height="40" rx="8" class="nodeT"/><text x="195" y="110" text-anchor="middle">K = XW_K</text>
+ <rect x="150" y="150" width="90" height="40" rx="8" class="nodeT"/><text x="195" y="175" text-anchor="middle">V = XW_V</text>
+ <rect x="290" y="50" width="100" height="44" rx="8" class="nodeY"/><text x="340" y="70" text-anchor="middle">Q·Kᵀ</text><text x="340" y="86" text-anchor="middle" class="small mono">N × N</text>
+ <rect x="420" y="50" width="100" height="44" rx="8" class="nodeS"/><text x="470" y="70" text-anchor="middle">÷ √d (+ mask)</text><text x="470" y="86" text-anchor="middle" class="small">keep variance ≈ 1</text>
+ <rect x="550" y="50" width="90" height="44" rx="8" class="nodeR"/><text x="595" y="77" text-anchor="middle">softmax</text>
+ <rect x="560" y="140" width="110" height="50" rx="8" class="nodeO"/><text x="615" y="160" text-anchor="middle">Z = A·V</text><text x="615" y="178" text-anchor="middle" class="small mono">N × d per head</text>
+ <path d="M100 100 L146 42" class="edge" marker-end="url(#l6a)"/><path d="M100 105 H146" class="edge" marker-end="url(#l6a)"/><path d="M100 110 L146 168" class="edge" marker-end="url(#l6a)"/>
+ <path d="M240 40 L286 64" class="edge" marker-end="url(#l6a)"/><path d="M240 105 L286 82" class="edge" marker-end="url(#l6a)"/>
+ <path d="M390 72 H416" class="edge" marker-end="url(#l6a)"/><path d="M520 72 H546" class="edge" marker-end="url(#l6a)"/>
+ <path d="M595 94 V136" class="edge" marker-end="url(#l6a)"/><path d="M240 170 H556" class="edge" marker-end="url(#l6a)"/>
+ <text x="700" y="80" class="small">× number</text><text x="700" y="95" class="small">of heads,</text><text x="700" y="110" class="small">concatenate</text>
+ </g>
+</svg></div><figcaption>One head. Each head has its own W_Q, W_K, W_V; their outputs are concatenated (and mixed by W_O).</figcaption></figure>
+<ol>
+ <li><b>Create Q, K, V</b>: three separate linear layers with learned weights. Each token's embedding Eᵢ gives Qᵢ = EᵢW_Q, Kᵢ = EᵢW_K, Vᵢ = EᵢW_V.</li>
+ <li><b>Similarity</b>: Q (N×d) × Kᵀ (d×N) = N×N matrix of dot products. Row j = how much token j's query matches every key.</li>
+ <li><b>Normalise</b>: divide by √d (raw dot products grow with dimension 64, 512…; dividing keeps the variance at 1), add the mask, softmax each row ("sharpens" attention).</li>
+ <li><b>Weighted sum</b>: multiply the weights by the value vectors: zᵢ = Σⱼ softmax(qᵢ·kⱼ/√d)·vⱼ.</li>
+</ol>
+
+<div class="stepper" aria-label="Worked attention example">
+ <div class="sh"><b>Worked example: "tall green creature"</b><span class="cnt"></span><button class="ibtn" data-prev>← Prev</button><button class="ibtn" data-next>Next →</button></div>
+ <div class="step"><p>Embeddings (E = 2) and weights (d = 2):</p><div class="formula">X = tall     [1, 0]          W_Q = [[1,0],[0,1]]   (identity)
+    green    [0, 1]          W_K = [[0,1],[1,0]]   (swap)
+    creature [1, 1]          W_V = [[1,0],[0,2]]</div></div>
+ <div class="step"><p><b>Step 1</b> · Q = XW_Q, K = XW_K, V = XW_V</p><div class="formula">          Q        K        V
+tall     [1,0]    [0,1]    [1,0]
+green    [0,1]    [1,0]    [0,2]
+creature [1,1]    [1,1]    [1,2]</div></div>
+ <div class="step"><p><b>Step 2</b> · QKᵀ (row = query, column = key)</p><div class="formula">            tall  green  creature
+tall          0     1       1
+green         1     0       1
+creature      1     1       2</div><p>"creature" matches itself most (score 2).</p></div>
+ <div class="step"><p><b>Step 3</b> · ÷ √2 then softmax each row</p><div class="formula">            tall    green   creature
+tall        0.198   0.401   0.401
+green       0.401   0.198   0.401
+creature    0.248   0.248   0.504      (each row sums to 1)</div></div>
+ <div class="step"><p><b>Step 4</b> · Z = A·V</p><div class="formula">z_tall     = 0.198·[1,0] + 0.401·[0,2] + 0.401·[1,2] = [0.599, 1.604]
+z_green    = [0.802, 1.198]
+z_creature = 0.248·[1,0] + 0.248·[0,2] + 0.504·[1,2] = [0.752, 1.504]</div><p>Every word now carries context from the others.</p></div>
+ <div class="step"><p><b>Step 5</b> · With a decoder (look-ahead) mask: add −∞ above the diagonal before softmax.</p><div class="formula">            tall    green   creature
+tall        1       0       0
+green       0.670   0.330   0
+creature    0.248   0.248   0.504
+z_tall = [1, 0]    z_green = [0.670, 0.660]    z_creature unchanged</div><p>"tall" can only see itself; the last token sees everything, so its row doesn't change.</p></div>
+</div>
+
+<h4>Multi-head attention 多頭注意力</h4>
+<ul>
+ <li>Split the embedding across heads: <b>query size d = E / number of heads</b> (e.g. E = 512, 8 heads → d = 64).</li>
+ <li>Each head has its own Q, K, V and its own N×N attention matrix, so different heads capture different relationships (gender, number, adjective, action…). Outputs are concatenated back to E.</li>
+ <li>Formula: <span class="m">softmax((QKᵀ + mask)/√d)·V</span>, repeated for each head.</li>
+</ul>
+<h4>Attention masks 遮罩</h4>
+<div class="grid2">
+ <div class="box"><h4>Padding mask</h4><p>Encoder self-attention and encoder–decoder attention: sentences have different lengths, so pad positions get −∞ (zero attention).</p></div>
+ <div class="box"><h4>Look-ahead mask</h4><p>Decoder self-attention: stop the decoder "peeking" at later target words when predicting the next word. Masked entries = −∞ → softmax gives 0.</p></div>
+</div>
+
+<h3 id="s3"><span class="num">03</span>Sparse attention: DSA and MSA<span class="zh">稀疏注意力</span></h3>
+<p>Observation: for any query, only a few tokens matter; about 90% of attention weights are near zero. Full attention costs O(L²) dot products for context length L.</p>
+<div class="grid2">
+ <div class="box"><h4>DeepSeek Sparse Attention (DSA, Dec 2025)</h4><ul><li>A small, fast "lightning indexer" learns to predict which tokens full attention would pick: the <b>top-k (k = 2048)</b>.</li><li>Attend to those k only: <b>O(L²) → O(Lk)</b>.</li><li>Inference cost cut by &gt;80%, ~20× less KV cache, scales past 1M tokens.</li></ul></div>
+ <div class="box"><h4>MiniMax Sparse Attention (MSA, Jun 2026)</h4><ul><li><b>Index branch</b>: DSA-style scoring of KV <b>blocks</b> of 128 tokens (max pooling), keep top-k = 16 blocks.</li><li><b>Main branch</b>, hardware-aware: decoding is memory-bandwidth bound (loading the KV cache). Contiguous blocks load faster than scattered tokens.</li><li>Asks "for this context block, which words matter?" instead of per word. 28.4× less attention compute at 1M context.</li></ul></div>
+</div>
+<div class="formula">e.g. L = 128,000, k = 2,048 :  per query 128,000 → 2,048 dot products  (62.5× fewer)</div>
+
+<h3 id="s4"><span class="num">04</span>Feed-forward block and why transformers work<span class="zh">前饋層與 Transformer 優勢</span></h3>
+<div class="grid2">
+ <div class="box"><h4>Feed-forward network (FFN)</h4><ol><li>Linear transformation (dense layer)</li><li>Activation (non-linearity)</li><li>Dropout (prevents overfitting)</li><li>Layer normalisation (stabilises, speeds training)</li></ol><p style="margin:6px 0 0">Why it matters: learns complex patterns, versatile, scalable (each token independent → parallel), simple and efficient (matrix multiply + activation).</p></div>
+ <div class="box"><h4>Why transformers beat LSTMs</h4><p>LSTMs (standard before 2017) capture dependencies of only ~7–15 tokens.</p><ol><li><b>Variable-size embedding</b>: N×E grows with input, instead of a fixed-size RNN state, so no information is squeezed out.</li><li><b>Direct interaction</b> between any two tokens; RNN interaction depends on their distance.</li><li><b>Parallelisable</b> over all token pairs.</li></ol></div>
+</div>
+<p><b>Summary</b>: the encoder starts with an embedding for each word, builds Q, K, V from it, and computes a new, context-aware embedding with attention. The decoder generates the output word by word using (1) the encoder's representation and (2) its own last output.</p>
+
+<h3 id="s5"><span class="num">05</span>BERT<span class="zh">BERT：雙向 Transformer 編碼器</span></h3>
+<p><b>B</b>idirectional <b>E</b>ncoder <b>R</b>epresentations from <b>T</b>ransformers (Google, 2018). Uses only the transformer <b>encoder</b>. (ELMo and BERT are both Sesame Street characters.)</p>
+<div class="grid2">
+ <div class="box"><h4>Pre-training task 1: Masked LM</h4><ul><li>Mask <b>15%</b> of words; predict them from the unmasked words on <b>both sides</b> (CBOW-like).</li><li>Classification layer on the encoder output → multiply by the embedding matrix → vocabulary-size scores → softmax.</li><li>Better than next-token prediction because it sees the whole context.</li></ul></div>
+ <div class="box"><h4>Pre-training task 2: Next Sentence Prediction</h4><ul><li>Pairs of sentences: [CLS] at the start, [SEP] after each sentence.</li><li><b>50% true next sentence, 50% random</b>; binary classifier gives P(IsNext) via softmax.</li><li>Helps tasks about sentence relationships (QA, entailment).</li><li><b>RoBERTa</b> drops NSP and uses more data with dynamic masking.</li></ul></div>
+</div>
+<p>What filling in a mask teaches: <b>facts</b> (HKU is in ___ → Pokfulam), <b>syntax</b> (I put ___ fork down → the/a), <b>coreference</b> (the woman… over ___ shoulder → her), <b>semantics</b>, <b>sentiment</b>, <b>reasoning</b> (Beth later left the ___ → kitchen), <b>arithmetic</b> (3 × 9 = ___).</p>
+
+<figure><div class="fig">
+<svg viewBox="0 0 640 200" width="640" role="img" aria-label="BERT input equals token plus sentence plus position embeddings">
+ <g font-size="12">
+ <text x="10" y="28" class="bold">Input</text>
+ <g class="mono" font-size="11.5">
+ <rect x="110" y="12" width="56" height="26" rx="5" class="nodeY"/><text x="138" y="30" text-anchor="middle">[CLS]</text>
+ <rect x="172" y="12" width="56" height="26" rx="5" class="node"/><text x="200" y="30" text-anchor="middle">my</text>
+ <rect x="234" y="12" width="56" height="26" rx="5" class="node"/><text x="262" y="30" text-anchor="middle">dog</text>
+ <rect x="296" y="12" width="56" height="26" rx="5" class="nodeY"/><text x="324" y="30" text-anchor="middle">[SEP]</text>
+ <rect x="358" y="12" width="56" height="26" rx="5" class="node"/><text x="386" y="30" text-anchor="middle">he</text>
+ <rect x="420" y="12" width="56" height="26" rx="5" class="node"/><text x="448" y="30" text-anchor="middle">barks</text>
+ <rect x="482" y="12" width="56" height="26" rx="5" class="nodeY"/><text x="510" y="30" text-anchor="middle">[SEP]</text>
+ </g>
+ <text x="10" y="74">Token</text><text x="10" y="114">Sentence</text><text x="10" y="154">Position</text>
+ <g class="mono" font-size="11">
+ <rect x="110" y="58" width="428" height="26" rx="5" class="nodeT"/><text x="324" y="76" text-anchor="middle">E[CLS]  E_my  E_dog  E[SEP]  E_he  E_barks  E[SEP]   (vocab IDs)</text>
+ <rect x="110" y="98" width="428" height="26" rx="5" class="nodeS"/><text x="324" y="116" text-anchor="middle">E_A    E_A    E_A    E_A    E_B    E_B    E_B       (0s / 1s)</text>
+ <rect x="110" y="138" width="428" height="26" rx="5" class="nodeO"/><text x="324" y="156" text-anchor="middle">E_0    E_1    E_2    E_3    E_4    E_5    E_6</text>
+ </g>
+ <text x="560" y="116" font-size="20">+</text><text x="560" y="156" font-size="20">+</text>
+ <text x="324" y="190" text-anchor="middle" class="small">BERT-Base: 12 encoder blocks, hidden size 768. Input embedding = sum of the three.</text>
+ </g>
+</svg></div></figure>
+
+<h4>BERT for word embeddings 上下文詞向量</h4>
+<ul>
+ <li>Every layer's output per token can be a word embedding; the <b>last 4 layers</b> work best: concatenate (4 × 768 = 3072) or sum (768).</li>
+ <li>"After stealing money from the <b>bank</b> vault, the <b>bank</b> robber was seen fishing on the Mississippi river <b>bank</b>." Three different vectors: cos(bank-vault, bank-robber) = <b>0.94</b>, cos(bank-robber, river-bank) = <b>0.69</b>. Context-dependent, unlike Word2Vec.</li>
+</ul>
+<h4>Fine-tuning BERT for tasks 微調</h4>
+<div class="tbl"><table>
+<tr><th>Task</th><th>Input</th><th>What's added</th></tr>
+<tr><td>Classification (sentiment, inference, similarity)</td><td>[CLS] sentence [SEP]</td><td>Classification layer K×H on the [CLS] hidden state (K labels, H hidden size) + softmax</td></tr>
+<tr><td>Single-sentence tagging (NER)</td><td>sentence</td><td>Every token's final hidden state → classifier → one tag per token</td></tr>
+<tr><td>Question answering (reader)</td><td>question [SEP] paragraph</td><td>Two new vectors S and E (size H). P(token i is start) = softmax(S·Tᵢ); P(end) = softmax(E·Tᵢ)</td></tr>
+</table></div>
+<p>Most hyper-parameters stay as in pre-training; only a small layer is added. A full QA system = query processing (keywords by part of speech) → document retrieval → passage retrieval → <b>answer extraction with BERT</b>.</p>
+
+<h3 id="s6"><span class="num">06</span>Tokenization<span class="zh">分詞：WordPiece / BPE</span></h3>
+<ul>
+ <li>Units: sentence, word, character, or <b>subword</b> (balance between word and character). Byte-Pair Encoding or WordPiece split by frequency.</li>
+ <li>"embeddings" → <span class="tok">em</span><span class="tok sub">##bed</span><span class="tok sub">##ding</span><span class="tok sub">##s</span>. "##" means "continues the previous piece".</li>
+ <li>BERT vocabulary ≈ <b>30,000</b>: whole words; word-initial subwords; "##" subwords; single characters.</li>
+ <li>Algorithm: whole word in vocab? → else <b>largest possible subwords</b> from the left → last resort, single characters (so any word can be represented).</li>
+ <li>Advantages: smaller vocabulary (smaller model) and unseen words still work: antidisestablishmentarianism → anti · dis · establish · ment · arian · ism.</li>
+</ul>
+<div class="widget" id="wp">
+ <div class="wt">WordPiece tokenizer<small>try it</small></div>
+ <label for="wpIn">Type a word (lower case). Vocabulary is a small demo list.</label>
+ <input id="wpIn" type="text" value="unaffordable" autocomplete="off" spellcheck="false">
+ <div id="wpOut"></div>
+ <div class="out" id="wpLog"></div>
+</div>
+
+<h3 id="s7"><span class="num">07</span>BART and the three model families<span class="zh">GPT · BERT · BART</span></h3>
+<figure><div class="fig">
+<svg viewBox="0 0 600 170" width="600" role="img" aria-label="GPT decoder only, BERT encoder only, BART encoder-decoder">
+ <g font-size="12.5">
+ <rect x="20" y="30" width="160" height="110" rx="10" class="node"/><text x="100" y="22" text-anchor="middle" class="bold">GPT (2018)</text>
+ <rect x="45" y="60" width="110" height="50" rx="6" class="nodeR"/><text x="100" y="82" text-anchor="middle">Decoder only</text><text x="100" y="98" text-anchor="middle" class="small">left → right</text>
+ <text x="100" y="132" text-anchor="middle" class="small">generation</text>
+ <rect x="220" y="30" width="160" height="110" rx="10" class="node"/><text x="300" y="22" text-anchor="middle" class="bold">BERT (2018)</text>
+ <rect x="245" y="60" width="110" height="50" rx="6" class="nodeT"/><text x="300" y="82" text-anchor="middle">Encoder only</text><text x="300" y="98" text-anchor="middle" class="small">bidirectional</text>
+ <text x="300" y="132" text-anchor="middle" class="small">understanding</text>
+ <rect x="420" y="30" width="160" height="110" rx="10" class="node"/><text x="500" y="22" text-anchor="middle" class="bold">BART (2019)</text>
+ <rect x="432" y="60" width="64" height="50" rx="6" class="nodeT"/><text x="464" y="89" text-anchor="middle">Enc</text>
+ <rect x="504" y="60" width="64" height="50" rx="6" class="nodeR"/><text x="536" y="89" text-anchor="middle">Dec</text>
+ <text x="500" y="132" text-anchor="middle" class="small">both: generate + understand</text>
+ </g>
+</svg></div><figcaption>ELMo: bidirectional LSTM features plugged into a task-specific model. GPT/BERT/BART: one pre-trained transformer, minimally changed (fine-tuned) per task.</figcaption></figure>
+<p><b>BART</b> (Bidirectional and Auto-Regressive Transformers): BERT-style bidirectional encoder + GPT-style left-to-right decoder. Trained as a <b>denoising autoencoder</b>: corrupt the text, reconstruct the original (cross-entropy). Corruptions: token masking, token deletion, sentence permutation, document rotation, <b>text infilling</b> (spans with Poisson-distributed lengths each replaced by one [MASK]). Fine-tuned for classification, token tagging, generation, translation.</p>
+
+<h3 id="s8"><span class="num">08</span>Model size: counting parameters<span class="zh">計算模型參數量</span></h3>
+<div class="tbl"><table>
+<tr><th>Component</th><th>Exact</th><th>Approx.</th><th>Why</th></tr>
+<tr><td>Multi-head attention</td><td class="m">4E² + 4E</td><td class="m">4E²</td><td>W_Q, W_K, W_V, W_O each E×E (+ bias E)</td></tr>
+<tr><td>Feed-forward (MLP)</td><td class="m">2EH + E + H</td><td class="m">2EH</td><td>E×H up, H×E down (+ biases)</td></tr>
+<tr><td>Layer norm (Add &amp; Norm)</td><td class="m">2E</td><td class="m">0</td><td>scale γ and shift β</td></tr>
+<tr><td><b>Encoder layer</b></td><td class="m">4E² + 2EH + 9E + H</td><td class="m">4E² + 2EH</td><td>1 attention, 1 FFN, 2 norms</td></tr>
+<tr><td><b>Decoder layer</b></td><td class="m">8E² + 2EH + 15E + H</td><td class="m">8E² + 2EH</td><td>2 attentions (self + enc–dec), 1 FFN, 3 norms</td></tr>
+</table></div>
+<div class="grid2">
+<div class="box"><h4>GPT-2 small (decoder-only, no cross-attention)</h4>
+<div class="formula" style="white-space:pre-wrap">E=768, H=3072, V=50,257, N=1024, L=12
+Embedding VE + NE      = 39,383,808
+Per block: 2E + (4E²+4E) + 2E + (2EH+E+H)
+                       = 7,087,872
+× 12 blocks            = 85,054,464
+Final layer norm 2E    = 1,536
+Output layer: tied to embedding (0 new)
+TOTAL                  = 124,439,808</div></div>
+<div class="box"><h4>Llama-2-13B</h4>
+<div class="formula" style="white-space:pre-wrap">E=5120, H=13,824, V=32,000, L=40
+Embedding VE           = 163,840,000
+Per block: E + 4E² + E + 3EH
+  (RMSNorm E, no biases, gated MLP 3EH)
+                       = 317,204,480
+× 40                   = 12,688,179,200
+Final RMSNorm E        = 5,120
+Output VE (not tied)   = 163,840,000
+TOTAL                  ≈ 13.0 B</div></div>
+</div>
+<div class="callout tip"><div class="lab">Exam link</div><p>May 2025 Q2 used P ≈ 2VE + L(4E² + 3EH + 2E): that is exactly the Llama formula (2VE = input + output embeddings). The MLP (3EH) dominates, so H, E or L can each halve the model; V cannot.</p></div>
+<div class="widget" id="calc">
+ <div class="wt">Parameter calculator<small>try it</small></div>
+ <div class="wrow">
+  <div><label for="cPre">Preset</label><select id="cPre"><option value="gpt2">GPT-2 small</option><option value="gpt2m">GPT-2 medium</option><option value="bert">BERT-base (GPT-2 formula)</option><option value="llama">Llama-2-13B</option><option value="llama7">Llama-2-7B</option></select></div>
+  <div><label for="cMode">Formula</label><select id="cMode"><option value="gpt">GPT-2 style (biases, 2EH)</option><option value="llama">Llama style (RMSNorm, 3EH)</option></select></div>
+ </div>
+ <div class="wrow">
+  <div><label for="cV">V vocab</label><input id="cV" type="number" inputmode="numeric"></div>
+  <div><label for="cE">E embed</label><input id="cE" type="number" inputmode="numeric"></div>
+  <div><label for="cH">H MLP</label><input id="cH" type="number" inputmode="numeric"></div>
+  <div><label for="cN">N context</label><input id="cN" type="number" inputmode="numeric"></div>
+  <div><label for="cL">L layers</label><input id="cL" type="number" inputmode="numeric"></div>
+ </div>
+ <div class="out" id="cOut"></div>
+</div>
+<div class="callout zhbox"><div class="lab">中文重點</div>
+<p>注意力四步：(1) 以三個權重矩陣得出 Q、K、V；(2) Q·Kᵀ 計相似度；(3) 除以 √d、加遮罩、softmax；(4) 乘 V 加權平均。多頭注意力：d = E ÷ 頭數。遮罩：編碼器遮 padding，解碼器遮未來字。DSA 只計 top-k 個 token，O(L²) 變 O(Lk)。BERT 只用編碼器，以 15% 遮罩語言模型及下一句預測 (NSP, 50/50) 預訓練；輸入 = 詞 + 句子 + 位置嵌入；最後四層做詞向量最好。WordPiece 先找整字，否則由左邊取最長子詞，最後用單字母。參數量：注意力 4E²、前饋 2EH，編碼層約 4E²+2EH，解碼層約 8E²+2EH；GPT-2 小型約 1.24 億。</p></div>
+<div class="callout exam"><div class="lab">Likely exam questions</div><ul>
+ <li>Compute Q·Kᵀ, scale, softmax, output (past papers every year), possibly with a mask.</li>
+ <li>Count parameters of an encoder/decoder layer or a whole GPT given E, H, V, N, L.</li>
+ <li>Give BERT training examples (MLM 15%, NSP, QA start/end) from a paragraph (Dec 2025 Q4).</li>
+ <li>Masking in transformer vs BERT (May 2025 Q8); why divide by √d; advantages over RNN/LSTM (Dec 2024 Q5).</li>
+ <li>Tokenize a word with WordPiece; compare GPT / BERT / BART.</li></ul></div>
+</section>
+
+<script>
+(function(){
+ // WordPiece demo
+ var vocab=['un','under','afford','able','##able','##aff','##afford','##ord','##s','##ing','##ed','##er','em','##bed','##ding','anti','##dis','##establish','##ment','##arian','##ism','token','##ize','##ization','play','##ful','##ly','deep','learn','##learn','transform','##er','##ers','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+ 'abcdefghijklmnopqrstuvwxyz'.split('').forEach(function(c){vocab.push('##'+c);});
+ var V=new Set(vocab), whole=new Set(['afford','token','play','deep','learn','transform','under']);
+ var inp=document.getElementById('wpIn'),out=document.getElementById('wpOut'),log=document.getElementById('wpLog');
+ function tok(w){
+  var steps=[],res=[];
+  if(whole.has(w)){steps.push('"'+w+'" is a whole word in the vocabulary → 1 token');return {res:[w],steps:steps};}
+  steps.push('"'+w+'" is not a whole word → take the longest matching piece from the left each time');
+  var s=0;
+  while(s<w.length){
+   var e=w.length,found=null;
+   while(e>s){var sub=w.slice(s,e);if(s>0)sub='##'+sub;if(V.has(sub)){found=sub;break;}e--;}
+   if(!found){steps.push('no piece found for "'+w.slice(s)+'"');res.push('[UNK]');break;}
+   steps.push('position '+s+': longest match "'+found+'"');res.push(found);s=e;
+  }
+  return {res:res,steps:steps};
+ }
+ function draw(){
+  var w=(inp.value||'').toLowerCase().replace(/[^a-z]/g,'');
+  if(!w){out.innerHTML='';log.textContent='Type a word.';return;}
+  var r=tok(w);
+  out.innerHTML=r.res.map(function(t){var c=t.indexOf('##')===0?(t.length===3?'tok ch':'tok sub'):'tok';return '<span class="'+c+'">'+t+'</span>';}).join('');
+  log.textContent=r.steps.join('\n')+'\n→ '+r.res.length+' token(s). Try: embeddings, playfully, antidisestablishmentarianism, tokenization, xyz';
+ }
+ inp.addEventListener('input',draw);draw();
+
+ // parameter calculator
+ var P={gpt2:{V:50257,E:768,H:3072,N:1024,L:12,m:'gpt'},gpt2m:{V:50257,E:1024,H:4096,N:1024,L:24,m:'gpt'},bert:{V:30522,E:768,H:3072,N:512,L:12,m:'gpt'},llama:{V:32000,E:5120,H:13824,N:4096,L:40,m:'llama'},llama7:{V:32000,E:4096,H:11008,N:4096,L:32,m:'llama'}};
+ var ids=['V','E','H','N','L'],el={};ids.forEach(function(k){el[k]=document.getElementById('c'+k);});
+ var pre=document.getElementById('cPre'),mode=document.getElementById('cMode'),o=document.getElementById('cOut');
+ function f(n){return Math.round(n).toLocaleString('en-US');}
+ function calc(){
+  var v={};ids.forEach(function(k){v[k]=parseFloat(el[k].value)||0;});
+  var E=v.E,H=v.H,lines=[];
+  if(mode.value==='gpt'){
+   var emb=v.V*E+v.N*E, blk=2*E+(4*E*E+4*E)+2*E+(2*E*H+E+H), tot=emb+v.L*blk+2*E;
+   lines.push('Embedding VE + NE         '+f(emb));
+   lines.push('Per block                 '+f(blk));
+   lines.push('  attention 4E²+4E        '+f(4*E*E+4*E));
+   lines.push('  MLP 2EH+E+H             '+f(2*E*H+E+H));
+   lines.push('  2 layer norms 4E        '+f(4*E));
+   lines.push('× '+v.L+' blocks              '+f(v.L*blk));
+   lines.push('Final layer norm 2E       '+f(2*E));
+   lines.push('TOTAL                     '+f(tot)+'  (≈ '+(tot/1e6).toFixed(1)+' M)');
+  } else {
+   var blk2=E+4*E*E+E+3*E*H, tot2=v.V*E+v.L*blk2+E+v.V*E;
+   lines.push('Input embedding VE        '+f(v.V*E));
+   lines.push('Per block                 '+f(blk2));
+   lines.push('  attention 4E²           '+f(4*E*E));
+   lines.push('  MLP 3EH                 '+f(3*E*H));
+   lines.push('  2 RMSNorms 2E           '+f(2*E));
+   lines.push('× '+v.L+' blocks              '+f(v.L*blk2));
+   lines.push('Final RMSNorm + output VE '+f(E+v.V*E));
+   lines.push('TOTAL                     '+f(tot2)+'  (≈ '+(tot2/1e9).toFixed(2)+' B)');
+  }
+  o.textContent=lines.join('\n');
+ }
+ function load(){var p=P[pre.value];ids.forEach(function(k){el[k].value=p[k];});mode.value=p.m;calc();}
+ pre.addEventListener('change',load);mode.addEventListener('change',calc);ids.forEach(function(k){el[k].addEventListener('input',calc);});
+ load();
+})();
+</script>
+<section class="recall" id="recall"><h2>Recall check<span class="zh">即時測驗</span></h2><p class="qscore"></p><div class="mcq"><p class="qq">Why divide QKᵀ by √d?</p><div class="opts"><button class="o">to make it positive</button><button class="o" data-ok>dot products grow with d; scaling keeps variance ≈ 1 so softmax doesn&#x27;t saturate</button><button class="o">to reduce parameters</button><button class="o">to apply the mask</button></div><div class="exp">Large scores make softmax nearly one-hot with tiny gradients.</div></div><div class="mcq"><p class="qq">E = 768 with 12 heads. Query size d per head?</p><div class="opts"><button class="o">12</button><button class="o" data-ok>64</button><button class="o">768</button><button class="o">9216</button></div><div class="exp">d = E / heads = 768 / 12.</div></div><div class="mcq"><p class="qq">The decoder&#x27;s look-ahead mask sets future scores to…</p><div class="opts"><button class="o">0</button><button class="o">1</button><button class="o" data-ok>−∞ (so softmax gives 0)</button><button class="o">+∞</button></div><div class="exp">softmax(−∞) = 0, so future words get no attention.</div></div><div class="mcq"><p class="qq">BERT&#x27;s two pre-training tasks are…</p><div class="opts"><button class="o">next-word prediction and translation</button><button class="o" data-ok>masked LM (15%) and next sentence prediction</button><button class="o">CBOW and skip-gram</button><button class="o">denoising and RLHF</button></div><div class="exp">NSP uses 50% real next sentences, 50% random.</div></div><div class="mcq"><p class="qq">BERT input embedding is the sum of…</p><div class="opts"><button class="o">token + position</button><button class="o" data-ok>token + sentence (segment) + position</button><button class="o">word + character</button><button class="o">query + key + value</button></div><div class="exp">Segment embedding (0s/1s) tells the two sentences apart.</div></div><div class="mcq"><p class="qq">For question answering, BERT learns…</p><div class="opts"><button class="o">a new decoder</button><button class="o" data-ok>start vector S and end vector E</button><button class="o">a reward model</button><button class="o">a new tokenizer</button></div><div class="exp">P(start = i) = softmax(S·Tᵢ), P(end = i) = softmax(E·Tᵢ).</div></div><div class="mcq"><p class="qq">Approximate parameters of one transformer DECODER layer?</p><div class="opts"><button class="o">4E² + 2EH</button><button class="o" data-ok>8E² + 2EH</button><button class="o">4E²</button><button class="o">2EH</button></div><div class="exp">Self-attention + encoder–decoder attention (2 × 4E²) + FFN 2EH.</div></div><div class="mcq"><p class="qq">DeepSeek Sparse Attention reduces attention cost from…</p><div class="opts"><button class="o">O(L) to O(1)</button><button class="o" data-ok>O(L²) to O(Lk)</button><button class="o">O(Lk) to O(L²)</button><button class="o">O(E²) to O(E)</button></div><div class="exp">Each query attends only to the top-k (k = 2048) tokens chosen by a lightning indexer.</div></div><div class="mcq"><p class="qq">BART is…</p><div class="opts"><button class="o">encoder only</button><button class="o">decoder only</button><button class="o" data-ok>encoder–decoder trained as a denoising autoencoder</button><button class="o">an LSTM</button></div><div class="exp">Bidirectional encoder + autoregressive decoder; reconstructs corrupted text.</div></div><p style="margin-top:12px"><button class="ibtn" data-reset-quiz>Reset quiz</button></p></section><div class="donebar"><button class="donebtn">Mark this chapter as studied</button></div><nav class="pager" aria-label="Chapter navigation"><a class="pv" href="rnn-transformer.html"><small>← Previous</small><span>L5 NLP</span></a><a class="nx" href="llm-gpt.html"><small>Next →</small><span>L7 LLM &amp; GPT</span></a></nav><footer>DASC7606 Deep Learning (Dr Bethany Chan &amp; Prof Francis Chin, 2026). Notes built from lecture slides 01–07 and past papers May 2024 – Dec 2025.</footer></main><script src="app.js"></script></body></html>
