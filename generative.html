@@ -1,0 +1,211 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Deep generative models · DL7606</title><meta name="claude:viewport-fit-sides" content="cover"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;600&display=swap"><link rel="stylesheet" href="style.css"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body data-page="10"><header class="topbar"><div class="in"><a class="badge" href="index.html" aria-label="All chapters">DL·7606</a><span class="pt">10 · L9 Generative</span><button class="ibtn" data-fs="-1" aria-label="Smaller text">A−</button><button class="ibtn" data-fs="1" aria-label="Larger text">A+</button></div><div class="progress"></div></header><main class="wrap"><header class="pagehead"><div class="tag">10 · Lecture 9 · new</div><h1>Deep generative models<span class="zh">深度生成模型</span></h1><p class="lede">Lecture 9 finishes DeepSeek (mixture of experts, R1-Zero, GRPO) and then covers models that create images: DeepDream, style transfer, autoencoders, VAE, the GAN family, plus ViT and CLIP. GAN has appeared in three of the last four papers.</p><nav class="toc" aria-label="Sections"><a href="#s1"><b>01</b>Topic guide</a><a href="#s2"><b>02</b>DeepSeek, continued</a><a href="#s3"><b>03</b>Deep generative models: the list</a><a href="#s4"><b>04</b>DeepDream</a><a href="#s5"><b>05</b>Neural style transfer</a><a href="#s6"><b>06</b>Autoencoders</a><a href="#s7"><b>07</b>Variational autoencoder (VAE)</a><a href="#s8"><b>08</b>Generative adversarial networks (GAN)</a><a href="#s9"><b>09</b>Conditional GAN, Pix2Pix and CycleGAN</a><a href="#s10"><b>10</b>Vision Transformer (ViT)</a><a href="#s11"><b>11</b>CLIP: Contrastive Language–Image Pre-training</a><a href="#s12"><b>12</b>Exam-style practice</a><a href="#recall"><b>✓</b>Recall check</a></nav></header><section class="ch guide" id="guide"><h3 id="s1"><span class="num">01</span>Topic guide<span class="zh">課題導讀（中文解釋＋例子）</span></h3><p class="glede">Lecture 9 · Deep generative models outline. Tap a topic for a Traditional Chinese explanation and an example. The English notes below go into exam detail.</p><div class="tgl"><details class="tg" id="t-1"><summary><span class="tn">1</span><span class="tt"><b>DeepDream</b><span class="zh">DeepDream</span></span></summary><div class="tb"><p class="zh">固定一個訓練好的 CNN，修改輸入圖片令某層神經元的激活值最大（梯度上升），把網絡「看到」的圖案放大，產生夢幻效果。</p><p class="eg zh"><b>例子</b>用 ImageNet（很多狗和鳥的圖）訓練的網絡做 DeepDream，雲朵裡會「浮現」狗頭和鳥。</p></div></details><details class="tg" id="t-2"><summary><span class="tn">2</span><span class="tt"><b>Style transfer</b><span class="zh">風格轉移</span></span></summary><div class="tb"><p class="zh">輸出圖 x 要有內容圖 p 的內容和風格圖 a 的風格。內容損失：x 與 p 在某層特徵的均方誤差；風格損失：比較兩者的 Gram 矩陣（特徵之間的相關性 = 紋理）。總損失 = α·內容 + β·風格，對像素做梯度下降。</p><p class="eg zh"><b>例子</b>把你的維港相片（內容）配上梵高《星夜》（風格）：α/β 越大，越像原相；越小，筆觸越明顯。</p></div></details><details class="tg" id="t-3"><summary><span class="tn">3</span><span class="tt"><b>Autoencoder</b><span class="zh">自編碼器</span></span></summary><div class="tb"><p class="zh">編碼器把 x 壓縮成較低維的潛在向量 z，解碼器再還原成 x′，訓練令 x′ ≈ x（重建損失）。不用標籤（非監督）。用途：逐層預訓練網絡、去噪自編碼器 (DAE) 修復損壞圖片、把編碼器接上 softmax 做分類器、稀疏自編碼器找可解釋特徵。</p><p class="eg zh"><b>例子</b>784 像素的手寫數字壓縮成 32 個數字，再還原成 784 像素；去噪版本：輸入加了雜點的圖，目標是原本乾淨的圖。</p></div></details><details class="tg" id="t-4"><summary><span class="tn">4</span><span class="tt"><b>Variational autoencoder (VAE)</b><span class="zh">變分自編碼器</span></span></summary><div class="tb"><p class="zh">普通自編碼器的潛在空間有空隙，隨便取一點解碼出來是垃圾。VAE 的編碼器輸出平均值 μ 和標準差 σ（一個分佈），損失 = 重建損失 + KL 散度（令分佈接近標準常態）。潛在空間變得連續、完整，可抽樣生成新數據。</p><p class="eg zh"><b>例子</b>在「3」和「8」的潛在向量中間取一點，VAE 會解碼出一個介乎 3 和 8 之間、從未出現過的數字。缺點：生成的圖較模糊（學的是「平均」）。</p></div></details><details class="tg" id="t-5"><summary><span class="tn">5</span><span class="tt"><b>Generative adversarial network (GAN)</b><span class="zh">生成對抗網絡</span></span></summary><div class="tb"><p class="zh">生成器 G 把隨機噪聲 z 變成假樣本；判別器 D 判斷樣本是真是假（輸出 0–1）。D 想 D(x) → 1、D(G(z)) → 0；G 想 D(G(z)) → 1。兩者輪流訓練（min_G max_D 遊戲），直到 D 只能輸出 0.5。問題：模式崩潰、不收斂、扭曲圖像。</p><p class="eg zh"><b>例子</b>偽鈔集團（G）與警察（D）：警察越識分真假，偽鈔就越逼真。假圖得 D = 0.4：訓練 D 的損失 −ln 0.6 = 0.51；訓練 G 的損失 −ln 0.4 = 0.92。</p></div></details><details class="tg" id="t-6"><summary><span class="tn">6</span><span class="tt"><b>Conditional GAN</b><span class="zh">條件式 GAN</span></span></summary><div class="tb"><p class="zh">普通 GAN 不能指定生成甚麼。C-GAN 在 G 和 D 的輸入都加上標籤 N（經嵌入層），G 學生成「指定類別」的樣本，D 判斷「這是不是真的 N 類樣本」。需要標籤，所以不是完全非監督。</p><p class="eg zh"><b>例子</b>輸入標籤「7」→ 生成手寫的 7；輸入「連身裙」→ 生成連身裙圖片。</p></div></details><details class="tg" id="t-7"><summary><span class="tn">7</span><span class="tt"><b>Pix2Pix</b><span class="zh">Pix2Pix 圖對圖翻譯</span></span></summary><div class="tb"><p class="zh">C-GAN 的應用：以一張輸入圖 N 為條件，生成器（U-Net）輸出翻譯後的圖 G(N)；判別器看 (N, 真圖 x) 或 (N, G(N)) 判斷真假。需要「成對」的訓練數據。</p><p class="eg zh"><b>例子</b>黑白相 → 彩色相、草圖 → 手袋照片、衛星圖 → 地圖、白天 → 夜晚。</p></div></details><details class="tg" id="t-8"><summary><span class="tn">8</span><span class="tt"><b>CycleGAN</b><span class="zh">CycleGAN</span></span></summary><div class="tb"><p class="zh">不需要成對數據。兩個生成器（X→Y、Y→X）和兩個判別器。循環一致性：X 轉成 Y 再轉回 X，應該得回原圖。擅長改顏色和紋理，不擅長改形狀。</p><p class="eg zh"><b>例子</b>馬 ↔ 斑馬、相片 ↔ 莫奈油畫、夏天 ↔ 冬天。蘋果 → 橙通常失敗（形狀要變）；訓練集沒有人騎馬的圖，所以騎士也會被塗上斑馬紋。</p></div></details><details class="tg" id="t-9"><summary><span class="tn">9</span><span class="tt"><b>Stable Diffusion</b><span class="zh">Stable Diffusion（擴散模型）</span></span></summary><div class="tb"><p class="zh">列在大綱中，但本講義未有詳細投影片。一般概念：訓練時逐步向圖片加噪聲，模型學習每一步如何去噪；生成時由純噪聲開始，按文字提示一步步去噪成圖片。</p><p class="eg zh"><b>例子</b>文字提示「穿實驗袍的貓科學家」→ 由一片雪花雜訊，經數十步去噪，變成一張清晰圖片。（等下一講確認細節。）</p></div></details><details class="tg" id="t-10"><summary><span class="tn">10</span><span class="tt"><b>Vision Transformer (ViT)</b><span class="zh">視覺 Transformer</span></span></summary><div class="tb"><p class="zh">把圖片切成 16×16 的小方塊，每塊當作一個「字」，加位置嵌入後送入 Transformer 編碼器分類。全域注意力一開始就看到整張圖；數據越多表現越好，在超大數據集預訓練後勝過 CNN。</p><p class="eg zh"><b>例子</b>224×224 的圖切成 (224/16)² = 196 個方塊，等於一句有 196 個字的句子。</p></div></details><details class="tg" id="t-11"><summary><span class="tn">11</span><span class="tt"><b>CLIP</b><span class="zh">CLIP 對比式圖文預訓練</span></span></summary><div class="tb"><p class="zh">用 4 億對「圖片–文字說明」訓練兩個編碼器（圖片用 ResNet、文字用 GPT-2 類模型）。對比學習：配對的圖文向量相似度要高，不配對的要低。之後可零樣本分類：把每個類別寫成「a photo of a ___」，選與圖片餘弦相似度最高的。</p><p class="eg zh"><b>例子</b>一張戴冷帽女孩的相：「A girl wearing a beanie」90%、「a hat」9%、「a dog」0%。不用重新訓練，就可以分類從未見過的類別。</p></div></details><p style="margin:8px 0 0"><button class="ibtn" data-tg-all>Open all topics</button></p></div></section><section class="ch">
+<div class="mm"><span class="root">L9 · Deep generative models</span><div class="branches">
+<div class="br"><b>DeepSeek (cont.)</b><ul><li>MoE replaces FFN</li><li>R1-Zero: pure RL, GRPO</li><li>R1: SFT → RL → SFT → RL</li><li>Distil with 800k samples</li></ul></div>
+<div class="br"><b>Change an image</b><ul><li>DeepDream (gradient ascent)</li><li>Style transfer: content + Gram style loss</li></ul></div>
+<div class="br"><b>Autoencoders 自編碼器</b><ul><li>x → z → x′, reconstruction loss</li><li>Pre-training, denoising, classifier</li><li>Sparse AE</li><li>VAE: μ, σ, KL loss</li></ul></div>
+<div class="br"><b>GAN family 生成對抗網絡</b><ul><li>G vs D, minimax loss</li><li>Mode collapse, non-convergence</li><li>C-GAN, Pix2Pix (paired)</li><li>CycleGAN (unpaired)</li></ul></div>
+<div class="br"><b>Vision + language</b><ul><li>ViT: 16×16 patches as tokens</li><li>CLIP: contrastive image–text</li><li>Zero-shot classification</li></ul></div>
+<div class="br new"><b>Listed, not yet on slides</b><ul><li>Stable Diffusion</li></ul></div>
+</div></div>
+
+<h3 id="s2"><span class="num">02</span>DeepSeek, continued<span class="zh">DeepSeek（續）</span></h3>
+<div class="grid2">
+ <div class="box"><h4>Mixture of Experts (MoE) 混合專家</h4><p>In each transformer block the single feed-forward network (FFN) is replaced by many smaller <b>expert</b> FFNs plus a <b>router</b> that sends each token to only its top-k experts. DeepSeekMoE uses fine-grained experts and always-on <b>shared experts</b>. Total parameters are huge (671B) but each token uses only a small fraction, so compute stays low.</p></div>
+ <div class="box"><h4>DeepSeek-R1-Zero: pure RL (like AlphaGo Zero)</h4><p>Start from V3-Base and train with <b>GRPO</b> (Group Relative Policy Optimization): for each question generate k outputs, score each with <b>rule-based rewards</b> (accuracy of the answer, correct format with &lt;think&gt;…&lt;/think&gt;&lt;answer&gt;…&lt;/answer&gt;), and push the model towards the better-than-average ones. No human feedback needed. Its responses grow longer during training, and it shows an <b>"aha moment"</b> where it stops and re-checks its reasoning.</p></div>
+</div>
+<div class="tbl"><table><tr><th>R1 stage</th><th>What</th><th>Why</th></tr>
+<tr><td>[1] SFT</td><td>Fine-tune V3-Base on high-quality, readable R1-Zero outputs ("cold start")</td><td>Fix R1-Zero's poor readability and language mixing</td></tr>
+<tr><td>[2] RL</td><td>GRPO on maths, programming and logic with rule-based rewards</td><td>Reinforce good reasoning</td></tr>
+<tr><td>[3] SFT</td><td>Model [2] generates many samples; keep only correct, readable ones (checked with V3); add V3's non-reasoning data</td><td>Good at both reasoning and general tasks</td></tr>
+<tr><td>[4] RL</td><td>GRPO on diverse tasks: rule rewards where possible, LLM feedback for human preference otherwise</td><td>Behave well in all scenarios</td></tr></table></div>
+<p>Pipelines: R1-Zero = pre-training → RL. R1 = pre-training → SFT → RL → SFT → RL. <b>Distillation</b>: smaller open models (Qwen, Llama) were fine-tuned with <b>SFT only on 800k R1 samples</b>, giving strong small reasoning models.</p>
+
+<h3 id="s3"><span class="num">03</span>Deep generative models: the list<span class="zh">深度生成模型總覽</span></h3>
+<p>A <b>generative</b> model creates new data (images, text) instead of only classifying it. Lecture 9 covers: DeepDream · style transfer · autoencoder · variational autoencoder (VAE) · GAN (conditional GAN, Pix2Pix, CycleGAN) · Stable Diffusion (listed) · plus ViT and CLIP. Products: Deep Dream Generator, text-to-image (2022), AI video (Veo 3, Hailuo/MiniMax, Seedance, Kling).</p>
+
+<h3 id="s4"><span class="num">04</span>DeepDream<span class="zh">DeepDream</span></h3>
+<p>Google, built on the <b>gradient ascent</b> visualisation from lecture 4. Choose an image I and a trained CNN. Let f_x(I) be the activation of neuron x in layer L. <b>Fix the weights</b>, feed I forward to layer L, back-propagate to the pixels, and change I to <b>maximise f_x(I)</b>. Whatever the neuron "sees" gets exaggerated.</p>
+<ul><li>Lower-layer neurons → strokes and textures; higher layers → more sophisticated objects.</li><li>Trained on ImageNet (many dogs and birds), so dogs and birds keep popping up.</li></ul>
+
+<h3 id="s5"><span class="num">05</span>Neural style transfer<span class="zh">神經風格轉移</span></h3>
+<p>Gatys et al. 2016: make an output image <b>x</b> with the <b>content</b> of image <b>p</b> and the <b>style</b> (texture) of image <b>a</b>. Key idea: a pre-trained CNN separates content from style.</p>
+<div class="formula">Content loss (layer l):  L_content = ½ Σ (F_ij(x) − P_ij(p))²        F = features of x, P = features of p
+Gram matrix (layer l):   G_ij = Σ_k F_ik F_jk     N×N, N = number of feature maps (each M×M)
+                         dot product of feature maps i and j = how often they fire together = texture
+Style loss (layer l):    E_l = 1/(4N²M⁴) Σ (G_ij(x) − A_ij(a))² ;   L_style = Σ_l w_l E_l
+Total:                   L = α·L_content(p, x) + β·L_style(a, x)     → gradient descent on the PIXELS of x</div>
+<div class="grid2">
+ <div class="box"><h4>Tiny Gram example</h4><p>Three feature maps flattened to 4 values: F₁ = [1,0,2,1], F₂ = [0,1,1,0], F₃ = [2,2,0,1].</p><div class="formula" style="white-space:pre-wrap">G = [[6,2,3],
+     [2,2,2],
+     [3,2,9]]
+G₁₃ = 1·2 + 0·2 + 2·0 + 1·1 = 3</div></div>
+ <div class="box"><h4>Controls</h4><ul><li><b>α/β larger</b> → more content kept; smaller → more style.</li><li><b>Spatial control</b>: different styles for different regions (e.g. sky vs ground).</li><li><b>Colour control</b>: keep the content image's colours, via luminance-only transfer or colour-histogram matching.</li></ul></div>
+</div>
+
+<h3 id="s6"><span class="num">06</span>Autoencoders<span class="zh">自編碼器</span></h3>
+<figure><div class="fig">
+<svg viewBox="0 0 600 190" width="600" role="img" aria-label="Autoencoder: input x, encoder, small latent z, decoder, reconstruction x prime">
+ <defs><marker id="l9a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+ <g font-size="12.5">
+ <rect x="20" y="30" width="60" height="130" rx="8" class="node"/><text x="50" y="100" text-anchor="middle">x</text>
+ <path d="M100 30 L230 70 L230 120 L100 160 Z" class="nodeT"/><text x="160" y="100" text-anchor="middle">Encoder</text>
+ <rect x="250" y="70" width="60" height="50" rx="8" class="nodeY"/><text x="280" y="92" text-anchor="middle">z</text><text x="280" y="108" text-anchor="middle" class="small">latent</text>
+ <path d="M330 70 L460 30 L460 160 L330 120 Z" class="nodeS"/><text x="400" y="100" text-anchor="middle">Decoder</text>
+ <rect x="480" y="30" width="60" height="130" rx="8" class="node"/><text x="510" y="100" text-anchor="middle">x′</text>
+ <path d="M80 95 H96" class="edge" marker-end="url(#l9a)"/><path d="M230 95 H246" class="edge" marker-end="url(#l9a)"/><path d="M310 95 H326" class="edge" marker-end="url(#l9a)"/><path d="M460 95 H476" class="edge" marker-end="url(#l9a)"/>
+ <text x="300" y="185" text-anchor="middle" class="small">z = g(W₁x + b₁) ,  x′ = g(W₂z + b₂) ,  minimise Σ ‖x′ − x‖²  (reconstruction loss)</text>
+ </g>
+</svg></div><figcaption>Unsupervised: the target is the input itself. The narrow middle forces z to keep only the important information (dimensionality reduction).</figcaption></figure>
+<div class="tbl"><table><tr><th>Use</th><th>How</th></tr>
+<tr><td>1. Pre-train deep networks</td><td>Greedily train a stack of shallow autoencoders one layer at a time on unlabelled data; then fine-tune the last layer, then the whole network, on labelled data.</td></tr>
+<tr><td>2. Denoising autoencoder (DAE)</td><td>Add noise / zero out random inputs on purpose; the loss compares the output with the <b>original clean</b> input, not the corrupted one. Recovers corrupted images.</td></tr>
+<tr><td>3. Classifier</td><td>Train an autoencoder, remove the decoder, add a sigmoid/softmax layer, train only that layer with encoder weights frozen. The encoder is a feature extractor.</td></tr>
+<tr><td>Sparse autoencoder (SAE)</td><td>Add a sparsity penalty: L = ‖x′ − x‖² + λ·penalty(z) (e.g. L1), so only a few hidden units fire (like the brain). Prevents overfitting and gives <b>interpretable features</b>; used to interpret language models (2023).</td></tr></table></div>
+
+<h3 id="s7"><span class="num">07</span>Variational autoencoder (VAE)<span class="zh">變分自編碼器</span></h3>
+<p><b>Problem</b>: a plain autoencoder's latent space has distinct clusters with <b>gaps</b>. Great for reconstructing, bad for generating: decode a point in a gap and you get nonsense.</p>
+<p>A VAE wants a latent space with <b>continuity</b> (nearby points decode to similar content) and <b>completeness</b> (any sampled point decodes to something meaningful).</p>
+<div class="grid2">
+ <div class="box"><h4>How</h4><ul><li>The encoder outputs two vectors of size n: a <b>mean μ</b> and a <b>standard deviation σ</b>; sample z ~ N(μ, σ²).</li><li>AE learns a compressed representation; <b>VAE learns the parameters of a probability distribution</b>, so it can sample new data.</li></ul></div>
+ <div class="box"><h4>Loss</h4><div class="formula" style="white-space:pre-wrap">Loss = reconstruction loss + KL divergence
+     = −E_z[log p(x|z)] + D_KL(q ‖ p)</div><p style="margin:6px 0 0">KL alone piles all encodings at the centre (useless). Both together give smooth, well-separated clusters, so interpolating between "3" and "8" produces in-between digits that never existed.</p></div>
+</div>
+<p>Weakness: VAE learns an "averaged" representation, so generated images are <b>blurry</b>. That motivates GANs.</p>
+
+<h3 id="s8"><span class="num">08</span>Generative adversarial networks (GAN)<span class="zh">生成對抗網絡</span></h3>
+
+ <figure><div class="fig">
+ <svg viewBox="0 0 760 210" width="760" role="img" aria-label="GAN: noise to generator to fake image, discriminator judges real vs fake">
+  <defs><marker id="arC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <g font-size="12.5">
+  <rect x="10" y="130" width="110" height="40" rx="6" class="node"/><text x="65" y="148" text-anchor="middle">random noise z</text><text x="65" y="163" text-anchor="middle" class="small">(latent vector)</text>
+  <rect x="160" y="130" width="120" height="40" rx="6" class="nodeT"/><text x="220" y="148" text-anchor="middle" class="bold">Generator G</text><text x="220" y="163" text-anchor="middle" class="small">生成器</text>
+  <rect x="320" y="130" width="110" height="40" rx="6" class="nodeY"/><text x="375" y="155" text-anchor="middle">fake image G(z)</text>
+  <rect x="320" y="40" width="110" height="40" rx="6" class="node"/><text x="375" y="65" text-anchor="middle">real image x</text>
+  <rect x="480" y="85" width="130" height="40" rx="6" class="nodeR"/><text x="545" y="103" text-anchor="middle" class="bold">Discriminator D</text><text x="545" y="118" text-anchor="middle" class="small">判別器</text>
+  <rect x="650" y="85" width="100" height="40" rx="6" class="node"/><text x="700" y="103" text-anchor="middle">P(real)</text><text x="700" y="118" text-anchor="middle" class="small">∈ [0, 1]</text>
+  <path d="M120 150 H156" class="edge" marker-end="url(#arC)"/><path d="M280 150 H316" class="edge" marker-end="url(#arC)"/>
+  <path d="M430 150 L476 115" class="edge" marker-end="url(#arC)"/><path d="M430 60 L476 95" class="edge" marker-end="url(#arC)"/><path d="M610 105 H646" class="edge" marker-end="url(#arC)"/>
+  <path d="M700 125 V195 H220 V174" class="edgeR" marker-end="url(#arC)"/>
+  <text x="460" y="190" fill="var(--rose)">gradient through D tells G how to look more real</text>
+  </g>
+ </svg></div></figure>
+ <div class="tbl"><table><tr><th>Component</th><th>Function</th><th>Input</th><th>Output</th></tr>
+ <tr><td>Generator G</td><td>Create realistic synthetic samples to fool D (a counterfeiter)</td><td>Random noise vector z (plus a label for conditional GAN)</td><td>Synthetic sample, e.g. an image</td></tr>
+ <tr><td>Discriminator D</td><td>Tell real from fake (the police); binary classifier</td><td>A real or generated sample</td><td>Probability the input is real</td></tr></table></div>
+ <div class="formula">Loss: binary cross-entropy (= binary logistic loss)
+  min_G max_D   E[log D(x)] + E[log(1 − D(G(z)))]
+
+D training:   real x  → target 1 :  loss = −log D(x)
+              fake    → target 0 :  loss = −log(1 − D(G(z)))
+G training:   fake    → target 1 :  loss = −log D(G(z))     (D frozen; gradient flows through D into G)</div>
+ <div class="grid2">
+  <div class="box"><h4>Real image, D outputs 0.7</h4><p>Only D learns from it (G was not involved). Target 1, loss = −ln 0.7 = 0.357. Backprop pushes D's output towards 1.</p></div>
+  <div class="box"><h4>Fake image, D outputs 0.4 (or 0.2)</h4><p><b>D step</b>: target 0, loss = −ln(1 − 0.4) = 0.511; push towards 0. <b>G step</b>: freeze D, target 1, loss = −ln 0.4 = 0.916; update G's weights so D's score rises. For 0.2: D loss 0.223, G loss 1.609 (G is losing badly, big gradient).</p></div>
+ </div>
+ <ul>
+  <li><b>Training</b> alternates: train D for a step (or k steps) on real + fake, then train G with D frozen. With a generated sample, either G or D is trained in a given step: D with target 0, G with target 1.</li>
+  <li><b>Challenges</b>: mode collapse (G produces few varieties); non-convergence / oscillation; vanishing gradient when D becomes too good; balancing D and G; no simple metric of quality; sensitive to hyper-parameters; high compute.</li>
+  <li><b>Variation of samples</b> comes from the random input z (and the label in a conditional GAN). Mode collapse is the failure of variation.</li>
+  <li><b>Turing-test analogy</b>: D plays the interrogator, G the machine. G succeeds when D can't do better than guess (outputs 0.5 everywhere).</li>
+  <li><b>Colourising B/W photos</b>: a conditional GAN (pix2pix-style) with an encoder–decoder (U-Net) generator. Input greyscale, output colour; skip connections keep edges sharp; D judges whether the colour looks plausible.</li>
+ </ul>
+
+ 
+<div class="formula">Discriminator:  max_D  log D(x) + log(1 − D(G(z)))       (D(x) → 1, D(G(z)) → 0)
+Generator:      min_G  log(1 − D(G(z)))                   (wants D(G(z)) → 1)
+Together:       min_G max_D  E_x~R[log D(x)] + E_z[log(1 − D(G(z)))]
+
+for each iteration:
+  for k steps: sample m noise z and m real x; update D by ASCENDING  ∇θ_D (1/m)Σ[log D(xᵢ) + log(1 − D(G(zᵢ)))]
+  sample m noise z; update G by DESCENDING ∇θ_G (1/m)Σ log(1 − D(G(zᵢ)))
+At the optimum the fake distribution F matches the real one R and D outputs 0.5.</div>
+<p>Lecture's three problems: <b>mode collapse</b> (real data has several modes and G learns just one: "easier to be an expert on one than a jack of all trades"), <b>non-convergence</b> (a zero-sum minimax game can oscillate) and <b>distorted figures</b>.</p>
+<div class="widget" id="gan">
+ <div class="wt">GAN loss calculator<small>try it</small></div>
+ <div class="wrow">
+  <div><label for="gS">Sample is</label><select id="gS"><option value="real">real image x</option><option value="fake" selected>generated image G(z)</option></select></div>
+  <div><label for="gD">D output = <b id="gDv">0.40</b></label><input id="gD" type="range" min="0.01" max="0.99" step="0.01" value="0.40"></div>
+ </div>
+ <div class="out" id="gOut"></div>
+</div>
+
+<h3 id="s9"><span class="num">09</span>Conditional GAN, Pix2Pix and CycleGAN<span class="zh">條件式 GAN、Pix2Pix、CycleGAN</span></h3>
+<div class="tbl wideT"><table><tr><th>Model</th><th>Condition / data</th><th>Architecture</th><th>Examples</th></tr>
+<tr><td><b>Conditional GAN</b> (2014)</td><td>Class label N (one-hot, through an embedding layer). Needs labels, so not fully unsupervised.</td><td>G gets [z, N] → G(z|N). D gets [sample, N] → D(sample|N).</td><td>Generate a chosen digit or clothing type (dress, suit, T-shirt…). Fixes GAN's lack of control and diversity.</td></tr>
+<tr><td><b>Pix2Pix</b> (2017)</td><td>An input image N; <b>paired</b> training data (before/after)</td><td>G = <b>U-Net</b>: N → G(N) of the same size. D judges (N, x) real vs (N, G(N)) fake.</td><td>Segmentation map → photo, satellite → map, day → night, black-and-white → colour, sketch → image.</td></tr>
+<tr><td><b>CycleGAN</b> (2017)</td><td><b>Unpaired</b> images from domains X and Y</td><td>2 generators (G_Y: X→Y, G_X: Y→X), 2 discriminators (D_X, D_Y). <b>Cycle consistency</b>: X → Y → X should return the original.</td><td>Horse ↔ zebra, photo ↔ Monet, summer ↔ winter.</td></tr></table></div>
+<figure><div class="fig">
+<svg viewBox="0 0 520 170" width="520" role="img" aria-label="CycleGAN: X to Y with G_Y, Y back to X with G_X, discriminators D_X and D_Y">
+ <defs><marker id="l9b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowheadT"/></marker>
+ <marker id="l9c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowheadR"/></marker></defs>
+ <g font-size="13">
+ <rect x="60" y="60" width="90" height="50" rx="10" class="nodeT"/><text x="105" y="82" text-anchor="middle" class="bold">Domain X</text><text x="105" y="99" text-anchor="middle" class="small">horses</text>
+ <rect x="370" y="60" width="90" height="50" rx="10" class="nodeS"/><text x="415" y="82" text-anchor="middle" class="bold">Domain Y</text><text x="415" y="99" text-anchor="middle" class="small">zebras</text>
+ <path d="M150 70 C 230 20, 290 20, 366 70" class="edgeT" marker-end="url(#l9b)"/><text x="260" y="30" text-anchor="middle">G_Y : X → Y</text>
+ <path d="M370 100 C 290 150, 230 150, 154 100" class="edgeR" style="stroke-dasharray:none" marker-end="url(#l9c)"/><text x="260" y="160" text-anchor="middle">G_X : Y → X</text>
+ <text x="105" y="135" text-anchor="middle" class="small">D_X: real horse?</text><text x="415" y="135" text-anchor="middle" class="small">D_Y: real zebra?</text>
+ <text x="260" y="92" text-anchor="middle" class="small">cycle: G_X(G_Y(x)) ≈ x</text>
+ </g>
+</svg></div></figure>
+<p><b>CycleGAN limits</b>: good at colour and texture (L1 norm), little success with <b>geometric</b> changes (apple → orange, dog → cat), and fails on data it never saw (a person riding a horse also gets zebra stripes).</p>
+
+<h3 id="s10"><span class="num">10</span>Vision Transformer (ViT)<span class="zh">視覺 Transformer</span></h3>
+<ul><li>Split the image into fixed-size <b>16×16 patches</b>, linearly embed each, add <b>position embeddings</b>, add a class token, and feed the sequence to a transformer encoder; an MLP head classifies.</li>
+<li>A 224×224 image → (224/16)² = <b>196 patch tokens</b>.</li>
+<li>Why it excels: <b>global attention</b> sees the whole image from layer 1 (CNNs only approximate that after many layers), and it <b>scales</b>: modest on mid-sized data, excellent after pre-training on massive data. Its share of papers rose sharply after 2021.</li></ul>
+
+<h3 id="s11"><span class="num">11</span>CLIP: Contrastive Language–Image Pre-training<span class="zh">CLIP 對比式圖文預訓練</span></h3>
+<ul><li>OpenAI, open source, <b>multimodal</b> (text + vision), <b>zero-shot</b> (handles labels it was never trained on). Trained on <b>400 million image–text pairs</b> from the internet; captions say more about a scene than manual labels.</li>
+<li><b>Contrastive pre-training</b>: a text encoder (GPT-2-like) and an image encoder (ResNet or ViT) each output a d-dim vector. For a batch of N pairs, compute the N×N cosine-similarity matrix; <b>maximise the diagonal</b> (matching pairs), <b>minimise the off-diagonal</b> (non-matching), using symmetric cross-entropy.</li>
+<li><b>Zero-shot classification</b>: write one prompt per class ("a photo of a dog", "a photo of a cat"…), encode them, encode the image, pick the prompt with the highest cosine similarity.</li>
+<li>K-shot learning: K examples per class. Few-shot K &lt; 10, one-shot K = 1, zero-shot K = 0.</li>
+<li>Impact: robust to distribution shift (ImageNet sketches, adversarial sets), and zero-shot CLIP beats many few-shot classifiers.</li></ul>
+<div class="widget" id="clip">
+ <div class="wt">CLIP zero-shot demo (toy 3-d embeddings)<small>try it</small></div>
+ <p style="margin:0;font-size:14px">Image embedding = [1, 0, 1]. Change it to see which caption wins.</p>
+ <div class="wrow"><div><label for="ci1">dim 1</label><input id="ci1" type="number" value="1" step="0.5"></div><div><label for="ci2">dim 2</label><input id="ci2" type="number" value="0" step="0.5"></div><div><label for="ci3">dim 3</label><input id="ci3" type="number" value="1" step="0.5"></div></div>
+ <div class="bars" id="cBars"></div>
+</div>
+
+<h3 id="s12"><span class="num">12</span>Exam-style practice<span class="zh">考試式練習</span></h3>
+<p class="q">1. (Dec 2025 Q3 style) A real image gives D = 0.7; a generated image gives D = 0.4. Describe the training for each.</p>
+<details class="ans"><summary>Show answer</summary><p><b>Real, 0.7</b>: only D is trained, target 1, loss −ln 0.7 = 0.357; backprop raises D(x). <b>Fake, 0.4</b>: D step with target 0, loss −ln(1 − 0.4) = 0.511 (push towards 0). G step with D frozen, target 1, loss −ln 0.4 = 0.916; gradients flow through D into G so its next samples score higher.</p></details>
+<p class="q">2. Why are VAE samples better than plain-autoencoder samples, but GAN samples sharper than VAE samples?</p>
+<details class="ans"><summary>Show answer</summary><p>A plain AE's latent space has gaps, so random points decode to nonsense. The VAE's KL term makes the space continuous and complete, so any sample decodes to something meaningful. But the VAE's reconstruction loss averages over possibilities, giving blurry images; a GAN's generator is judged by a discriminator that punishes anything that doesn't look real, so outputs are sharper.</p></details>
+<p class="q">3. You have 5,000 summer photos and 5,000 winter photos of different places. Pix2Pix or CycleGAN?</p>
+<details class="ans"><summary>Show answer</summary><p><b>CycleGAN</b>: the photos are unpaired (not the same scene before and after). Pix2Pix needs paired images. CycleGAN uses two generators, two discriminators and a cycle-consistency loss.</p></details>
+<p class="q">4. In style transfer, what is optimised, and what does the Gram matrix capture?</p>
+<details class="ans"><summary>Show answer</summary><p>The <b>pixels of the output image x</b> (the CNN's weights are fixed), minimising α·content loss + β·style loss. The Gram matrix holds dot products between feature maps in a layer: which features fire together, i.e. texture and style regardless of position.</p></details>
+<p class="q">5. How does CLIP classify an image into classes it was never trained on?</p>
+<details class="ans"><summary>Show answer</summary><p>Write a text prompt per class ("a photo of a {class}"), encode each with the text encoder, encode the image with the image encoder, and choose the class whose text embedding has the highest cosine similarity with the image embedding. No extra training: zero-shot.</p></details>
+
+<div class="callout zhbox"><div class="lab">中文重點</div>
+<p>DeepSeek：MoE 以多個專家前饋網絡取代單一 FFN，每個 token 只用少數專家；R1-Zero 純用 GRPO 強化學習（規則獎勵：準確度、格式），出現「aha moment」；R1 = SFT → RL → SFT → RL；用 80 萬樣本 SFT 蒸餾到小模型。DeepDream：固定權重，梯度上升修改圖片。風格轉移：內容損失 + 風格損失（Gram 矩陣），優化輸出圖的像素。自編碼器：x → z → x′，重建損失；可預訓練、去噪、做分類器；稀疏自編碼器可解釋。VAE：編碼器輸出 μ、σ，損失 = 重建 + KL 散度，潛在空間連續完整，但圖較模糊。GAN：生成器騙判別器，minimax；問題：模式崩潰、不收斂、扭曲。C-GAN 加標籤；Pix2Pix 要成對數據（U-Net）；CycleGAN 不用成對數據，靠循環一致性。ViT：16×16 圖塊當字。CLIP：4 億圖文對比學習，可零樣本分類。</p></div>
+<div class="callout exam"><div class="lab">Likely exam questions</div><ul>
+ <li>GAN: components with input/output; training when D gives a value on real or fake data; loss functions; problems (Dec 2025 Q3, May 2025 Q7, May 2024 Q3c).</li>
+ <li>Which GAN variant for a task (labels → C-GAN; paired images → Pix2Pix; unpaired → CycleGAN); colourising B/W photos.</li>
+ <li>Autoencoder vs VAE; denoising autoencoder; what the KL term does.</li>
+ <li>Style transfer losses and the Gram matrix; DeepDream as gradient ascent (Dec 2025 Q1c).</li>
+ <li>CLIP contrastive training and zero-shot; why ViT works.</li></ul></div>
+</section>
+
+<script>
+(function(){
+ var S=document.getElementById('gS'),D=document.getElementById('gD'),Dv=document.getElementById('gDv'),O=document.getElementById('gOut');
+ function gan(){var d=+D.value;Dv.textContent=d.toFixed(2);var t;
+  if(S.value==='real'){t='Real sample → only D is trained (G was not involved).\nD target 1, loss = −ln D(x) = −ln '+d.toFixed(2)+' = '+(-Math.log(d)).toFixed(3)+'\nBackprop raises D(x) towards 1.';}
+  else{t='Generated sample → two steps:\nD step: target 0, loss = −ln(1 − '+d.toFixed(2)+') = '+(-Math.log(1-d)).toFixed(3)+'  (push D(G(z)) towards 0)\nG step (D frozen): target 1, loss = −ln '+d.toFixed(2)+' = '+(-Math.log(d)).toFixed(3)+'  (push D(G(z)) towards 1)\n'+(d<0.5?'D is winning on this sample, so G gets the bigger loss.':'G is fooling D on this sample, so D gets the bigger loss.');}
+  O.textContent=t;}
+ S.addEventListener('change',gan);D.addEventListener('input',gan);gan();
+ var caps=['a photo of a cat',
+  'a photo of a dog',
+  'a photo of a car'],T=[[1,0,1],[1,1,0],[0,0,1]],B=document.getElementById('cBars'),ins=['ci1','ci2','ci3'].map(function(i){return document.getElementById(i);});
+ function clip(){var v=ins.map(function(e){return +e.value||0;});var nv=Math.hypot.apply(null,v)||1;
+  var c=T.map(function(t){return (t[0]*v[0]+t[1]*v[1]+t[2]*v[2])/(Math.hypot.apply(null,t)*nv);});
+  var e=c.map(function(x){return Math.exp(10*x);}),s=e.reduce(function(a,b){return a+b;},0);
+  B.innerHTML=caps.map(function(n,i){return '<div class="r"><span style="font-size:12px">'+n.replace('a photo of a ','')+'</span><span class="t"><i style="width:'+(e[i]/s*100).toFixed(1)+'%"></i></span><span class="v">'+(e[i]/s*100).toFixed(1)+'%</span></div>';}).join('')+'<div style="font-size:12px;color:var(--muted)">Text embeddings: cat [1,0,1], dog [1,1,0], car [0,0,1]. Cosine similarities: '+c.map(function(x){return x.toFixed(2);}).join(', ')+' → softmax (×10 temperature).</div>';}
+ ins.forEach(function(e){e.addEventListener('input',clip);});clip();
+})();
+</script>
+<section class="recall" id="recall"><h2>Recall check<span class="zh">即時測驗</span></h2><p class="qscore"></p><div class="mcq"><p class="qq">In DeepSeek&#x27;s mixture-of-experts, what replaces the single FFN in each block?</p><div class="opts"><button class="o">more attention heads</button><button class="o" data-ok>many expert FFNs plus a router that picks a few per token</button><button class="o">a bigger embedding</button><button class="o">an LSTM</button></div><div class="exp">Huge total parameters, but each token only uses a few experts.</div></div><div class="mcq"><p class="qq">DeepSeek-R1-Zero was trained with…</p><div class="opts"><button class="o">SFT only</button><button class="o">RLHF with human rankings</button><button class="o" data-ok>pure RL (GRPO) with rule-based rewards for accuracy and format</button><button class="o">distillation from GPT-4</button></div><div class="exp">Like AlphaGo Zero; it showed an &#x27;aha moment&#x27;.</div></div><div class="mcq"><p class="qq">DeepDream changes…</p><div class="opts"><button class="o">the CNN weights</button><button class="o" data-ok>the input image, to maximise a neuron&#x27;s activation</button><button class="o">the labels</button><button class="o">the learning rate</button></div><div class="exp">Weights fixed; gradient ascent on the pixels.</div></div><div class="mcq"><p class="qq">In style transfer, style is measured with…</p><div class="opts"><button class="o">pixel MSE</button><button class="o" data-ok>the Gram matrix of feature maps</button><button class="o">the softmax output</button><button class="o">IoU</button></div><div class="exp">Correlations between feature maps capture texture.</div></div><div class="mcq"><p class="qq">A denoising autoencoder&#x27;s loss compares the output with…</p><div class="opts"><button class="o">the corrupted input</button><button class="o" data-ok>the original clean input</button><button class="o">a label</button><button class="o">zero</button></div><div class="exp">It learns to remove the noise.</div></div><div class="mcq"><p class="qq">The VAE encoder outputs…</p><div class="opts"><button class="o">one code vector</button><button class="o" data-ok>a mean vector μ and a standard deviation vector σ</button><button class="o">class probabilities</button><button class="o">a Gram matrix</button></div><div class="exp">Loss = reconstruction + KL divergence.</div></div><div class="mcq"><p class="qq">A real image gets D(x) = 0.7. Which network is updated?</p><div class="opts"><button class="o">G only</button><button class="o" data-ok>D only</button><button class="o">both</button><button class="o">neither</button></div><div class="exp">G didn&#x27;t produce it; D&#x27;s loss is −ln 0.7 = 0.357.</div></div><div class="mcq"><p class="qq">Mode collapse means…</p><div class="opts"><button class="o">D always outputs 0.5</button><button class="o" data-ok>G produces only one or a few kinds of output</button><button class="o">training is too slow</button><button class="o">the loss is negative</button></div><div class="exp">Easier to be an expert on one mode than a jack of all trades.</div></div><div class="mcq"><p class="qq">Turning horse photos into zebra photos without paired examples needs…</p><div class="opts"><button class="o">Pix2Pix</button><button class="o">conditional GAN</button><button class="o" data-ok>CycleGAN</button><button class="o">VAE</button></div><div class="exp">Two generators, two discriminators, cycle consistency.</div></div><div class="mcq"><p class="qq">CLIP classifies an unseen class by…</p><div class="opts"><button class="o">retraining the last layer</button><button class="o" data-ok>choosing the text prompt whose embedding has the highest cosine similarity with the image</button><button class="o">pixel matching</button><button class="o">beam search</button></div><div class="exp">Zero-shot classification.</div></div><div class="mcq"><p class="qq">A 224×224 image in ViT with 16×16 patches gives how many tokens?</p><div class="opts"><button class="o">14</button><button class="o" data-ok>196</button><button class="o">256</button><button class="o">3,136</button></div><div class="exp">(224/16)² = 14² = 196.</div></div><p style="margin-top:12px"><button class="ibtn" data-reset-quiz>Reset quiz</button></p></section><div class="donebar"><button class="donebtn">Mark this chapter as studied</button></div><nav class="pager" aria-label="Chapter navigation"><a class="pv" href="lora-prompting.html"><small>← Previous</small><span>L8 LoRA &amp; prompting</span></a><a class="nx" href="solved.html"><small>Next →</small><span>Past Qs solved</span></a></nav><footer>DASC7606 Deep Learning (Dr Bethany Chan &amp; Prof Francis Chin, 2026). Notes built from lecture slides 01–09 and past papers May 2024 – Dec 2025.</footer></main><script src="app.js"></script></body></html>

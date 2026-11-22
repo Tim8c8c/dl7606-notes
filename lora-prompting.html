@@ -1,0 +1,278 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>LoRA, prompting and beyond · DL7606</title><meta name="claude:viewport-fit-sides" content="cover"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;600&display=swap"><link rel="stylesheet" href="style.css"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body data-page="09"><header class="topbar"><div class="in"><a class="badge" href="index.html" aria-label="All chapters">DL·7606</a><span class="pt">09 · L8 LoRA &amp; prompting</span><button class="ibtn" data-fs="-1" aria-label="Smaller text">A−</button><button class="ibtn" data-fs="1" aria-label="Larger text">A+</button></div><div class="progress"></div></header><main class="wrap"><header class="pagehead"><div class="tag">09 · Lecture 8</div><h1>LoRA, prompting and beyond<span class="zh">LoRA、提示工程與其他</span></h1><p class="lede">Lecture 8: how to adapt a big model cheaply (fine-tuning, LoRA, quantised memory), how to prompt it well (CO-STAR, in-context learning, chain of thought), RAG against hallucination, and how model families, benchmarks and DeepSeek fit in. Three calculators inside.</p><nav class="toc" aria-label="Sections"><a href="#s1"><b>01</b>Topic guide</a><a href="#s2"><b>02</b>From pre-training to a useful model</a><a href="#s3"><b>03</b>Fine-tuning and its problems</a><a href="#s4"><b>04</b>LoRA: Low-Rank Adaptation</a><a href="#s5"><b>05</b>GPU memory for fine-tuning</a><a href="#s6"><b>06</b>Prompting and prompt engineering</a><a href="#s7"><b>07</b>In-context learning</a><a href="#s8"><b>08</b>Chain of thought and friends</a><a href="#s9"><b>09</b>Prompt tuning (P-tuning)</a><a href="#s10"><b>10</b>Context engineering and RAG</a><a href="#s11"><b>11</b>GPT-4, data and GPT-5</a><a href="#s12"><b>12</b>Model families: pruning and distillation</a><a href="#s13"><b>13</b>Benchmarks: testing &quot;intelligence&quot;</a><a href="#s14"><b>14</b>DeepSeek</a><a href="#s15"><b>15</b>Exam-style practice</a><a href="#recall"><b>✓</b>Recall check</a></nav></header><section class="ch guide" id="guide"><h3 id="s1"><span class="num">01</span>Topic guide<span class="zh">課題導讀（中文解釋＋例子）</span></h3><p class="glede">Lecture 8 · NLP outline, topics 14–18. Tap a topic for a Traditional Chinese explanation and an example. The English notes below go into exam detail.</p><div class="tgl"><details class="tg" id="t-14"><summary><span class="tn">14</span><span class="tt"><b>Low-Rank Adaptation (LoRA)</b><span class="zh">低秩適應 LoRA</span></span></summary><div class="tb"><p class="zh">全量微調要更新數十億參數，又貴又易過擬合。LoRA 假設微調的改變量 ΔW 是「低秩」的，所以寫成 ΔW = B(n×r)·A(r×k)，r 很小。原本的 W₀ 凍結不動，只訓練 A 和 B；A 隨機初始化、B 設為 0，開始時 ΔW = 0。部署時把 W₀ + BA 合併，推理不會變慢。</p><p class="eg zh"><b>例子</b>一層 512×64 = 32,768 個參數；r = 8 時只需訓練 512×8 + 8×64 = 4,608 個，少 86%。比喻：一本厚字典（W₀）不改動，只在旁邊貼幾張便利貼（BA）記下新用法；換另一科目就換另一疊便利貼。</p></div></details><details class="tg" id="t-15"><summary><span class="tn">15</span><span class="tt"><b>Prompting and in-context learning</b><span class="zh">提示與情境學習</span></span></summary><div class="tb"><p class="zh">提示 = 給模型的指示、問題和例子。CO-STAR 框架：情境、目標、風格、語氣、受眾、回應格式。情境學習 (ICL) 是在提示中放幾個例子，模型不改參數就學會任務。思維鏈 (CoT) 叫模型寫出中間步驟；自洽性 (self-consistency) 生成多條推理再投票。</p><p class="eg zh"><b>例子</b>ICL：「好好味！→ 正面；好難食 → 負面；服務一流 → ？」模型答「正面」。零樣本 CoT：在題目後加「Let&#x27;s think step by step」，數學題準確度大增。</p></div></details><details class="tg" id="t-16"><summary><span class="tn">16</span><span class="tt"><b>Families of models and distillation</b><span class="zh">模型家族與蒸餾</span></span></summary><div class="tb"><p class="zh">由一個大模型製作一系列較小模型：先「剪枝」（用少量數據前向傳播，評估哪些層、注意力頭、神經元不重要，然後剪走），再「蒸餾」（小模型學習大模型的輸出）。寬度剪枝（縮小 E、H）比深度剪枝（刪層）效果好。</p><p class="eg zh"><b>例子</b>NVIDIA 把 Llama-3.1 8B 剪枝蒸餾成 4B 的 Minitron，只用 940 億個 token 訓練（原模型用 15 萬億）。</p></div></details><details class="tg" id="t-17"><summary><span class="tn">17</span><span class="tt"><b>LLM benchmarks</b><span class="zh">大型語言模型評測基準</span></span></summary><div class="tb"><p class="zh">用標準試題比較模型：HellaSwag（常識：選最合理的下文）、WinoGrande（代名詞指誰）、MMLU（57 科選擇題）、ARC（抽象推理）、GSM8K（小學數學應用題）、MBPP（Python 編程）。「shots」= 提示中給幾多個例子。</p><p class="eg zh"><b>例子</b>WinoGrande 例題：「獎盃放不進手提箱，因為它太大。」問「它」是獎盃還是手提箱？（答：獎盃）。人類準確率 94%。</p></div></details><details class="tg" id="t-18"><summary><span class="tn">18</span><span class="tt"><b>DeepSeek</b><span class="zh">DeepSeek</span></span></summary><div class="tb"><p class="zh">DeepSeek-V3：6,710 億參數的混合專家模型 (MoE)：每個 token 只啟動少數「專家」前饋網絡，所以運算便宜；14.8 萬億 token 預訓練，訓練費用少於 560 萬美元。R1-Zero 只用強化學習 (GRPO) 訓練推理，獎勵來自規則（答案對不對、格式對不對），模型自己學會「aha moment」和更長的思考。R1 加入 SFT 解決可讀性和中英夾雜問題。</p><p class="eg zh"><b>例子</b>MoE 比喻：一間醫院有 256 位專科醫生，但每個病人只會見其中幾位，不用全部醫生一齊看症。GRPO：同一題生成 k 個答案，對的得高分，模型學多做高分的思路。</p></div></details><p style="margin:8px 0 0"><button class="ibtn" data-tg-all>Open all topics</button></p></div></section><section class="ch">
+<div class="mm"><span class="root">L8 · LoRA, prompting &amp; beyond</span><div class="branches">
+<div class="br"><b>Fine-tuning 微調</b><ul><li>Pretrain → SFT → RLHF</li><li>Catastrophic forgetting</li><li>All / last k / bias-only / adapters</li></ul></div>
+<div class="br"><b>LoRA 低秩適應</b><ul><li>ΔW = BA, rank r ≪ min(n,k)</li><li>W₀ frozen; A Gaussian, B = 0</li><li>Merge W₀ + BA → no extra latency</li><li>7B: 112 GB → 13 GB</li></ul></div>
+<div class="br"><b>Prompting 提示</b><ul><li>CO-STAR · CROFTC</li><li>Roles, negative prompts</li><li>Threats don't help</li><li>P-tuning ≠ prompt engineering</li></ul></div>
+<div class="br"><b>Reasoning prompts</b><ul><li>In-context (few-shot) learning</li><li>Chain of thought, zero-shot CoT</li><li>Self-consistency (majority)</li><li>Chain of Draft</li></ul></div>
+<div class="br"><b>Context &amp; RAG</b><ul><li>Models are stateless</li><li>Ingest → retrieve → synthesise</li><li>Curbing hallucination</li></ul></div>
+<div class="br"><b>Models &amp; data</b><ul><li>GPT-4, GPT-5</li><li>Scale data with size</li><li>Prune + distil (Minitron)</li><li>Benchmarks · DeepSeek R1</li></ul></div>
+</div></div>
+
+<h3 id="s2"><span class="num">02</span>From pre-training to a useful model<span class="zh">由預訓練到可用模型</span></h3>
+<figure><div class="fig wideFig">
+<svg viewBox="0 0 760 170" width="760" role="img" aria-label="LLM training pipeline: untrained, pretraining, base model, SFT, instruct model, RLHF, final model">
+ <defs><marker id="l8a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+ <g font-size="12.5">
+ <rect x="10" y="40" width="80" height="40" rx="8" class="node"/><text x="50" y="65" text-anchor="middle">Untrained</text>
+ <rect x="130" y="40" width="100" height="40" rx="8" class="nodeT"/><text x="180" y="58" text-anchor="middle">Pre-training</text><text x="180" y="73" text-anchor="middle" class="small">next-token, huge data</text>
+ <rect x="270" y="40" width="70" height="40" rx="8" class="node"/><text x="305" y="65" text-anchor="middle">Base</text>
+ <rect x="380" y="40" width="100" height="40" rx="8" class="nodeY"/><text x="430" y="58" text-anchor="middle">SFT</text><text x="430" y="73" text-anchor="middle" class="small">(instruction, response)</text>
+ <rect x="520" y="40" width="80" height="40" rx="8" class="node"/><text x="560" y="65" text-anchor="middle">Instruct</text>
+ <rect x="640" y="40" width="110" height="40" rx="8" class="nodeS"/><text x="695" y="58" text-anchor="middle">RLHF / RLAIF</text><text x="695" y="73" text-anchor="middle" class="small">human or AI feedback</text>
+ <path d="M90 60 H126" class="edge" marker-end="url(#l8a)"/><path d="M230 60 H266" class="edge" marker-end="url(#l8a)"/><path d="M340 60 H376" class="edge" marker-end="url(#l8a)"/><path d="M480 60 H516" class="edge" marker-end="url(#l8a)"/><path d="M600 60 H636" class="edge" marker-end="url(#l8a)"/>
+ <text x="180" y="105" text-anchor="middle" class="small">costly; base model</text><text x="180" y="120" text-anchor="middle" class="small">doesn't follow instructions</text>
+ <text x="430" y="105" text-anchor="middle" class="small" fill="var(--teal)">← LoRA fits here</text>
+ <text x="695" y="105" text-anchor="middle" class="small">human feedback</text><text x="695" y="120" text-anchor="middle" class="small">is costly</text>
+ <text x="380" y="155" text-anchor="middle" class="small">GPT-3 cost ~US$4.6M to train; GPT-4 ~US$80–100M. DeepSeek-V3 claims &lt; US$5.6M.</text>
+ </g>
+</svg></div></figure>
+<p><b>Generative AI project lifecycle</b>: (1) identify the functions you need; (2) train from scratch or reuse an existing model (base, reasoning, instruction, multimodal); (3) adapt it with prompt engineering, fine-tuning and/or alignment; (4) assess performance; (5) optimise for deployment and user experience; (6) acknowledge and work around LLM limitations.</p>
+
+<h3 id="s3"><span class="num">03</span>Fine-tuning and its problems<span class="zh">微調及其問題</span></h3>
+<div class="grid2">
+ <div class="box"><h4>How much data do you have?</h4><ul><li><b>Lots</b> → train from scratch</li><li><b>Medium</b> → fine-tune</li><li><b>Sparse</b> → use the general model (prompting)</li></ul><p style="margin:6px 0 0"><b>Fine-tuning</b> (= transfer learning) updates a pre-trained model's parameters with new data, adapting to the target task while keeping its general knowledge.</p></div>
+ <div class="box"><h4>Approaches</h4><ul><li>All parameters</li><li>Last k layers only (e.g. k = 2)</li><li>Bias terms only</li><li><b>Adapter tuning</b>: insert 2 small FC layers; <b>adds inference latency</b></li></ul></div>
+</div>
+<ul>
+ <li><b>Catastrophic forgetting 災難性遺忘</b>: better on the new task, worse on others. Mitigation: fine-tune across a wide range of instruction types.</li>
+ <li>Retraining billions of parameters needs huge compute, memory, time, energy and money.</li>
+ <li>With little new data, full fine-tuning <b>overfits</b>.</li>
+</ul>
+
+<h3 id="s4"><span class="num">04</span>LoRA: Low-Rank Adaptation<span class="zh">低秩適應</span></h3>
+<p>Hu et al., Microsoft, 2021 (~44k citations). The main way to fine-tune large models cheaply.</p>
+<div class="grid2">
+ <div class="box"><h4>Background: rank 秩</h4><ul><li>Rank = number of linearly independent columns (or rows). For W (n×k), rank(W) ≤ min(n, k).</li><li>e.g. [[1,2],[2,4]] has rank 1: the second row is twice the first.</li><li><b>Low-rank</b>: rank ≪ min(n, k). Any rank-r matrix factors as W = B(n×r)·A(r×k).</li><li><b>Hypothesis</b>: the change ΔW from fine-tuning is low-rank.</li></ul></div>
+ <figure style="margin:0"><div class="fig">
+ <svg viewBox="0 0 340 230" width="100%" role="img" aria-label="LoRA: frozen W0 in parallel with trainable B times A">
+  <defs><marker id="l8b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+  <g font-size="12.5">
+  <text x="170" y="222" text-anchor="middle" class="mono">x  (k × 1)</text>
+  <rect x="30" y="80" width="130" height="80" rx="8" class="node"/><text x="95" y="112" text-anchor="middle" class="bold">W₀  (n × k)</text><text x="95" y="132" text-anchor="middle" class="small">pre-trained, FROZEN</text>
+  <path d="M200 160 L230 160 L250 130 L180 130 Z" class="nodeT"/><text x="215" y="150" text-anchor="middle" font-size="11">A (r×k)</text>
+  <path d="M180 112 L250 112 L230 82 L200 82 Z" class="nodeY"/><text x="215" y="102" text-anchor="middle" font-size="11">B (n×r)</text>
+  <text x="290" y="140" class="small">A ~ Gaussian</text><text x="290" y="100" class="small">B = 0 at start</text>
+  <text x="215" y="125" text-anchor="middle" class="small">r</text>
+  <circle cx="170" cy="40" r="14" class="nodeY"/><text x="170" y="45" text-anchor="middle">+</text>
+  <text x="170" y="14" text-anchor="middle" class="mono">h = W₀x + BAx  (n × 1)</text>
+  <path d="M170 206 V190 H95 V162" class="edge" marker-end="url(#l8b)"/><path d="M170 190 H215 V162" class="edge" marker-end="url(#l8b)"/>
+  <path d="M95 80 V60 L158 46" class="edge" marker-end="url(#l8b)"/><path d="M215 82 V60 L182 46" class="edge" marker-end="url(#l8b)"/>
+  </g>
+ </svg></div><figcaption>Only A and B are trained. Since B starts at 0, ΔW = BA = 0 at the start, so training begins from the original model.</figcaption></figure>
+</div>
+<div class="formula">W₀ + ΔW = W₀ + B(n×r)·A(r×k)        r ≪ min(n, k)   (typical r = 4 to 32)
+Forward pass:  h = W₀x + BAx
+Trainable:     nr + rk   instead of   nk
+Example:       n×k = 512×64 = 32,768 ;  r = 8 → 512·8 + 8·64 = 4,096 + 512 = 4,608   (86% fewer)
+Deploy:        compute and store W = W₀ + BA once → no extra inference time
+GPT-3 175B:    175 billion → ~17 million trainable  (≈ 10,000× fewer)</div>
+<div class="grid2">
+ <div class="box"><h4>Advantages</h4><ul><li>Orders of magnitude fewer trainable parameters → less training time, GPU memory and cost.</li><li>Less overfitting: original weights fixed, generalisation preserved.</li><li><b>No extra inference latency</b> (unlike adapters): merge BA into W₀.</li><li><b>Easy task switching</b>: one copy of W₀ + small (A, B) per task.</li><li>r is small and can be tuned for best results.</li></ul></div>
+ <div class="box"><h4>How r is chosen (May 2025 Q4)</h4><ul><li>Larger r: more capacity, more training memory.</li><li>Depends on training-GPU memory, amount of fine-tuning data, and the quality you need.</li><li>Not on the inference GPU (BA is merged).</li></ul></div>
+</div>
+<div class="widget" id="lora">
+ <div class="wt">LoRA parameter calculator<small>try it</small></div>
+ <div class="wrow">
+  <div><label for="lN">n (rows)</label><input id="lN" type="number" value="512" inputmode="numeric"></div>
+  <div><label for="lK">k (cols)</label><input id="lK" type="number" value="64" inputmode="numeric"></div>
+  <div><label for="lR">rank r</label><input id="lR" type="number" value="8" inputmode="numeric"></div>
+  <div><label for="lM">matrices</label><input id="lM" type="number" value="1" inputmode="numeric"></div>
+ </div>
+ <div class="out" id="lOut2"></div>
+</div>
+
+<h3 id="s5"><span class="num">05</span>GPU memory for fine-tuning<span class="zh">微調所需記憶體</span></h3>
+<p>Example from the slides: fine-tune Llama-2-7B on one GPU. Training needs the weights, a gradient for each trained weight, and Adam's two optimiser states (m and v) per trained weight.</p>
+<div class="tbl"><table>
+<tr><th>Item</th><th>Full fine-tune, FP32 (4 bytes)</th><th>LoRA + quantisation (slide)</th></tr>
+<tr><td>Weights</td><td class="n">7B × 4 = 28 GB</td><td class="n">INT8: 7B × 1 = 7 GB</td></tr>
+<tr><td>Gradients</td><td class="n">7B × 4 = 28 GB</td><td class="n">FP16: 1 × 2 = 2 GB</td></tr>
+<tr><td>Adam m and v</td><td class="n">2 × 7B × 4 = 56 GB</td><td class="n">FP16: 2 × 1 × 2 = 4 GB</td></tr>
+<tr><td><b>Total</b></td><td class="n"><b>112 GB</b> (more than one 80 GB H100)</td><td class="n"><b>13 GB</b> (fits a 16 GB T4)</td></tr>
+</table></div>
+<p style="font-size:14px;color:var(--muted)">The slide's 2 GB and 4 GB count gradients and optimiser states for about 1 billion values; with LoRA only the small A and B matrices need them.</p>
+<ul><li><b>Quantisation to 8-bit integers</b> causes <b>rounding</b> errors (values snapped to the nearest level) and <b>clipping</b> errors (values outside the range cut off). A good scheme keeps the quantised distribution close to the original.</li>
+<li>GPUs on the slide: H100 80 GB, A100 80/40, V100 32/16, RTX4090 48*, A10G 24, T4 16, RTX4080 16. (*The slide says 48; the standard RTX 4090 has 24 GB.)</li></ul>
+<div class="widget" id="mem">
+ <div class="wt">Training-memory calculator<small>try it</small></div>
+ <div class="wrow">
+  <div><label for="mP">Model params (B)</label><input id="mP" type="number" value="7" step="0.1" inputmode="decimal"></div>
+  <div><label for="mW">Weight bits</label><select id="mW"><option value="32">FP32 (32)</option><option value="16">FP16 (16)</option><option value="8">INT8 (8)</option><option value="4">4-bit</option></select></div>
+  <div><label for="mT">Trained params (B)</label><input id="mT" type="number" value="7" step="0.01" inputmode="decimal"></div>
+  <div><label for="mG">Grad/optimiser bits</label><select id="mG"><option value="32">FP32 (32)</option><option value="16">FP16 (16)</option></select></div>
+ </div>
+ <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="ibtn" data-mp="full">Slide: full FP32</button><button class="ibtn" data-mp="lora">Slide: LoRA + INT8</button></div>
+ <div class="out" id="mOut"></div>
+</div>
+
+<h3 id="s6"><span class="num">06</span>Prompting and prompt engineering<span class="zh">提示與提示工程</span></h3>
+<ul>
+ <li>A <b>prompt</b> is the user's input (instructions, questions, examples) telling a model what task to do, e.g. "Cat as a scientist conducting experiments in a lab" for Stable Diffusion.</li>
+ <li><b>Prompt engineering</b> = carefully designing prompts to get a specific output. It's empirical: effects vary a lot between models, so a prompt for one model may not work on another.</li>
+</ul>
+<div class="tbl"><table>
+<tr><th>CO-STAR</th><th>Meaning</th><th>Slide example (Facebook post for Alpha's hairdryer "Beta")</th></tr>
+<tr><td><b>C</b>ontext</td><td>Background information</td><td>"I want to advertise my company's new product. Company Alpha, product Beta, an ultra-fast hairdryer."</td></tr>
+<tr><td><b>O</b>bjective</td><td>The task</td><td>"Create a Facebook post that gets people to click the product link to buy it."</td></tr>
+<tr><td><b>S</b>tyle</td><td>Writing style</td><td>"Follow successful companies that advertise similar products, such as Dyson."</td></tr>
+<tr><td><b>T</b>one</td><td>Attitude</td><td>"Persuasive."</td></tr>
+<tr><td><b>A</b>udience</td><td>Who it's for</td><td>"Mostly the older generation; target what they look for in hair products."</td></tr>
+<tr><td><b>R</b>esponse</td><td>Output format</td><td>"The Facebook post, concise yet impactful."</td></tr>
+</table></div>
+<div class="grid2">
+ <div class="box"><h4>CROFTC vs CO-STAR</h4><ul><li><b>C</b>ontext = Context</li><li><b>R</b>ole: assign an identity, "You are a marketing copywriter…" (≈ Style)</li><li><b>O</b>bjective = Objective</li><li><b>F</b>orm: output structure, "a numbered list" (= Response)</li><li><b>T</b>one = Tone</li><li><b>C</b>onditions: boundaries, "under 10 words", "avoid technical terms"</li><li>Only CO-STAR has <b>A</b>udience.</li></ul></div>
+ <div class="box"><h4>More tips from the slides</h4><ul><li>Treat it like a person: interactive, multi-step questions.</li><li>Set the stage with a role or context ("act as a lawyer", "I'm a beginner runner…").</li><li>Ask it to write prompts for you.</li><li>Curb hallucination: "Why do you think that?", "What evidence supports your answer?"</li><li><b>Negative prompting</b>: "Don't write anything offensive, harmful or factually incorrect."</li><li>Experiment and rephrase; answers change between tries.</li></ul></div>
+</div>
+<p><b>Does tone matter?</b> Asked for 1,000 baby names, the plain prompt produced 50–100 names after hedging. Polite or flattering prompts did <b>no better</b>; <b>threatening prompts did significantly worse</b>.</p>
+<div class="widget" id="costar">
+ <div class="wt">CO-STAR prompt builder<small>try it</small></div>
+ <div class="wrow">
+  <div><label for="cC">Context</label><input id="cC" type="text" value="I'm an HKU MSc student revising deep learning."></div>
+  <div><label for="cO">Objective</label><input id="cO" type="text" value="Explain LoRA so I can answer an exam question."></div>
+  <div><label for="cS">Style</label><input id="cS" type="text" value="Like a clear lecturer, with one numeric example."></div>
+  <div><label for="cT">Tone</label><input id="cT" type="text" value="Encouraging and precise."></div>
+  <div><label for="cA">Audience</label><input id="cA" type="text" value="A student who knows matrices but not LoRA."></div>
+  <div><label for="cR">Response</label><input id="cR" type="text" value="Under 150 words, then 3 bullet-point key facts."></div>
+ </div>
+ <div class="out" id="cOut2"></div>
+ <p style="margin:0;font-size:13px;color:var(--muted)" id="cMiss"></p>
+</div>
+
+<h3 id="s7"><span class="num">07</span>In-context learning<span class="zh">情境學習</span></h3>
+<p><b>In-context learning (ICL)</b> = few-shot prompting: put task demonstrations in the prompt and let the frozen model infer the pattern (e.g. "Review: Delicious food! Sentiment: Positive … Review: Good meal! Sentiment: ___").</p>
+<div class="tbl"><table><tr><th></th><th>In-context learning</th><th>Fine-tuning</th></tr>
+<tr><td>Parameters</td><td>Unchanged (frozen)</td><td>Updated by training</td></tr>
+<tr><td>Flexibility</td><td>On the fly, any task, no retraining</td><td>Retrain per task</td></tr>
+<tr><td>Resources</td><td>Just inference</td><td>Extra compute and labelled data</td></tr></table></div>
+<p><b>Why does it work?</b> Still researched; it seems to be an <b>emergent ability</b> from pre-training. Two explanations on the slides: (1) the model computes "meta-gradients" from the demonstrations in its forward pass and implicitly does <b>gradient descent through attention</b>; (2) <b>implicit Bayesian inference</b>: the prompt helps the model "locate" a concept it learned in pre-training.</p>
+
+<h3 id="s8"><span class="num">08</span>Chain of thought and friends<span class="zh">思維鏈</span></h3>
+<div class="tbl"><table>
+<tr><th>Method</th><th>How</th><th>Note</th></tr>
+<tr><td>Standard prompting</td><td>Q → A examples, answer directly</td><td>Fails multi-step maths ("27" for the cafeteria problem)</td></tr>
+<tr><td><b>Few/one-shot CoT</b></td><td>Example answers show intermediate reasoning steps</td><td>Gets "23 − 20 = 3, 3 + 6 = 9" right. Ability appears naturally in large models; training on code (GitHub) boosted it</td></tr>
+<tr><td><b>Zero-shot CoT</b></td><td>Add "Let's think step by step." Two steps: (1) "Q: [X]. A: [T]" generates reasoning Z; (2) ask for the final answer</td><td>Other triggers: "Let's think about this logically", "…like a detective step by step"</td></tr>
+<tr><td><b>Self-consistency</b></td><td>Sample several reasoning paths; take the <b>majority</b> final answer</td><td>e.g. answers 2, 9, 9 → 9. Costs 5–10× compute</td></tr>
+<tr><td><b>Chain of Draft</b> (Zoom, 2025)</td><td>"Think step by step, but only keep a minimum draft for each step, with 5 words at most."</td><td>Nearly CoT accuracy with far fewer tokens</td></tr></table></div>
+<div class="tbl"><table><tr><th>GSM8K (slide)</th><th>Prompt</th><th class="n">Accuracy</th><th class="n">Tokens</th><th class="n">Latency</th></tr>
+<tr><td rowspan="3">GPT-4o</td><td>Standard</td><td class="n">53.3%</td><td class="n">1.1</td><td class="n">0.6 s</td></tr>
+<tr><td>CoT</td><td class="n">95.4%</td><td class="n">205.1</td><td class="n">4.2 s</td></tr>
+<tr><td>CoD</td><td class="n">91.1%</td><td class="n">43.9</td><td class="n">1.0 s</td></tr>
+<tr><td rowspan="3">Claude 3.5 Sonnet</td><td>Standard</td><td class="n">64.6%</td><td class="n">1.1</td><td class="n">0.9 s</td></tr>
+<tr><td>CoT</td><td class="n">95.8%</td><td class="n">190.0</td><td class="n">3.1 s</td></tr>
+<tr><td>CoD</td><td class="n">91.4%</td><td class="n">39.8</td><td class="n">1.6 s</td></tr></table></div>
+<p>Zero-shot CoD (no examples) works less well, likely because CoD-style reasoning is rare in training data.</p>
+
+<h3 id="s9"><span class="num">09</span>Prompt tuning (P-tuning)<span class="zh">提示微調</span></h3>
+<p><b>Not</b> prompt engineering. A <b>small trainable model</b> produces task-specific <b>virtual tokens</b> (soft prompts) that are prepended to the prompt before the frozen LLM. Motivated by token budget. Advantages: parameter-efficient (a small set of soft prompts vs full fine-tuning), swap prompts per task, and at inference the P-tuning model can be replaced by a lookup table.</p>
+
+<h3 id="s10"><span class="num">10</span>Context engineering and RAG<span class="zh">情境工程與檢索增強生成</span></h3>
+<ul>
+ <li>The model is <b>stateless</b>: it remembers nothing between calls ("Do you know my name?" "You never told me."). Apps store the chat history and re-send it each turn.</li>
+ <li>When input exceeds the context (block) size, it must be truncated; old or unimportant messages are dropped first, so the model "forgets" the start. <b>Context engineering</b> = systematically deciding what to keep and drop.</li>
+ <li>LLM weaknesses: don't know what they don't know (hallucination), out-of-date knowledge, may draw on unreliable sources.</li>
+</ul>
+<figure><div class="fig wideFig">
+<svg viewBox="0 0 760 200" width="760" role="img" aria-label="RAG pipeline: ingestion, retrieval, synthesis">
+ <defs><marker id="l8c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker></defs>
+ <g font-size="12.5">
+ <text x="120" y="20" text-anchor="middle" class="bold">1 · Ingestion</text>
+ <rect x="20" y="35" width="90" height="40" rx="6" class="node"/><text x="65" y="60" text-anchor="middle">Documents</text>
+ <rect x="130" y="35" width="90" height="40" rx="6" class="nodeT"/><text x="175" y="53" text-anchor="middle">Chunks →</text><text x="175" y="68" text-anchor="middle">embeddings</text>
+ <rect x="60" y="120" width="120" height="44" rx="22" class="nodeO"/><text x="120" y="146" text-anchor="middle">Vector store</text>
+ <path d="M110 55 H126" class="edge" marker-end="url(#l8c)"/><path d="M175 75 L140 116" class="edge" marker-end="url(#l8c)"/>
+ <text x="380" y="20" text-anchor="middle" class="bold">2 · Retrieval</text>
+ <rect x="320" y="35" width="120" height="40" rx="6" class="node"/><text x="380" y="53" text-anchor="middle">User query →</text><text x="380" y="68" text-anchor="middle">embedding</text>
+ <rect x="320" y="120" width="120" height="44" rx="6" class="nodeY"/><text x="380" y="139" text-anchor="middle">Most similar</text><text x="380" y="154" text-anchor="middle">chunks</text>
+ <path d="M380 75 V116" class="edge" marker-end="url(#l8c)"/><path d="M182 142 H316" class="edge" marker-end="url(#l8c)"/><text x="250" y="135" text-anchor="middle" class="small">similarity search</text>
+ <text x="640" y="20" text-anchor="middle" class="bold">3 · Synthesis</text>
+ <rect x="560" y="70" width="160" height="60" rx="8" class="nodeS"/><text x="640" y="95" text-anchor="middle">LLM prompt =</text><text x="640" y="112" text-anchor="middle">query + retrieved chunks</text>
+ <rect x="580" y="150" width="120" height="34" rx="6" class="node"/><text x="640" y="172" text-anchor="middle">Grounded answer</text>
+ <path d="M442 142 L556 110" class="edge" marker-end="url(#l8c)"/><path d="M442 55 L556 90" class="edge" marker-end="url(#l8c)"/><path d="M640 130 V146" class="edge" marker-end="url(#l8c)"/>
+ </g>
+</svg></div><figcaption>Evaluate three links: is the retrieved context relevant to the query? Is the response grounded in the context? Is the response relevant to the query?</figcaption></figure>
+<div class="callout exam"><div class="lab">Why GPT hallucinates, and fixes (Dec 2025 Q6)</div><ul>
+ <li>Cause: the base model produces the most <b>plausible</b> continuation, not the most truthful; training data has errors and misses recent events; it has no built-in sense of true vs false and guesses when data is sparse. (Plus the long-tail sampling effect from lecture 7.)</li>
+ <li>Fixes on the slides: <b>RAG</b> (supply facts from external sources as context); <b>fine-tune for factuality</b> (e.g. learn to say "I don't know"); <b>prompting</b> ("explain your reasoning", "don't guess if unsure"); <b>self-checking</b> (ask the model to review and correct its output).</li></ul></div>
+
+<h3 id="s11"><span class="num">11</span>GPT-4, data and GPT-5<span class="zh">GPT-4、訓練數據、GPT-5</span></h3>
+<div class="grid2">
+ <div class="box"><h4>GPT-4 (2023)</h4><ul><li>Multimodal (image + text). No architecture, size, data or training details released (guesses: ~1.7–1.8T params).</li><li>Simulated bar exam: top ~10% (GPT-3.5: bottom 10%).</li><li>&gt;25,000-word responses vs ~3,000 for GPT-3.5.</li><li>82% less likely to answer disallowed requests; 40% more likely to be factual.</li><li>Context 8,192 (32,768 version) vs 4,096 / 2,048 before.</li></ul></div>
+ <div class="box"><h4>GPT-5 (2025)</h4><ul><li><b>Unified model selector</b>: decides how much processing a request needs.</li><li><b>~80% fewer factual errors</b>; willing to say "I can't do that".</li><li>Builds apps in seconds; strong on tests and maths competitions.</li><li>Better medical answers (clarifying questions), multimodal (charts, diagrams, photos). Sizes: GPT-5, mini, nano.</li></ul></div>
+</div>
+<ul>
+ <li><b>Garbage in, garbage out</b>. Trillion-parameter models need trillions of tokens (GPT-4: ~13T tokens). Raw web text is noisy: formatting, spam, duplicates, misinformation. Common Crawl (~250B pages, open) is the biggest free source (FineWeb cleans it). GPT-3 filtered 45 TB to 570 GB.</li>
+ <li>GPT-3 data mix: Common Crawl 400 GB (60% weight, 0.44 epochs), books 67 GB (16%, 2.33), WebText 20 GB (21%, 2.9), Wikipedia 3 GB (3%, 3.4). High-quality sources are seen several times.</li>
+ <li><b>Compute-optimal (Chinchilla)</b>: large models are more sample-efficient, but <b>model size and training data should scale equally</b> (2× params → 2× data). A big model without enough data is wasted; many models should be smaller and trained longer.</li>
+</ul>
+
+<h3 id="s12"><span class="num">12</span>Model families: pruning and distillation<span class="zh">剪枝與蒸餾</span></h3>
+<p>NVIDIA built smaller models from a large one: 15B → 8B → 4B (Llama-3.1-Minitron 4B from Llama-3.1 8B).</p>
+<ol>
+ <li><b>Pruning</b>: start from the trained LLM → estimate importance of layers, heads, neurons and embedding channels using <b>only forward passes on a small calibration set (1,024 samples)</b>, simpler than gradients → rank → trim.</li>
+ <li><b>Distillation</b>: the pruned student learns from the teacher's outputs (logits), plus intermediate losses (embedding output, MLP input, block output, LM head), recovering accuracy with far less data.</li>
+</ol>
+<p>Findings: <b>width pruning</b> (shrink E and H) beats <b>depth pruning</b> (drop layers); the 4B model is below the 8B overall but smaller models can win on specific tasks; it needed only 94B training tokens vs 15T for Llama-3.1 8B.</p>
+
+<h3 id="s13"><span class="num">13</span>Benchmarks: testing "intelligence"<span class="zh">評測基準</span></h3>
+<div class="tbl"><table><tr><th>Benchmark</th><th>What it tests</th><th>Human</th></tr>
+<tr><td>HellaSwag</td><td>Commonsense: choose the most plausible continuation</td><td>95%+</td></tr>
+<tr><td>WinoGrande</td><td>44k pronoun-resolution problems (Winograd schema)</td><td>94%</td></tr>
+<tr><td>MMLU</td><td>16k multiple-choice questions, 57 subjects (maths, law, medicine…)</td><td>~89.8% (experts)</td></tr>
+<tr><td>ARC Challenge</td><td>Abstraction and reasoning puzzles needing no training</td><td>~100%</td></tr>
+<tr><td>GSM8K</td><td>8.5k grade-school maths word problems, 2–8 steps</td><td>–</td></tr>
+<tr><td>MBPP</td><td>~1,000 entry-level Python tasks, 3 test cases each (pass@1)</td><td>–</td></tr></table></div>
+<p>"Shots" = number of in-context examples given (e.g. HellaSwag 10-shot, MMLU 5-shot, MBPP 0-shot).</p>
+
+<h3 id="s14"><span class="num">14</span>DeepSeek<span class="zh">DeepSeek</span></h3>
+<ul>
+ <li>From hedge fund High-Flyer (Liang Wenfeng). DeepSeek founded 2023 for AGI. Coder and LLM (7B, 67B) 2023; MoE and Math 2024; <b>GRPO</b> (Group Relative Policy Optimization) 2024; V2, V2.5, <b>V3 (Dec 2024)</b>, <b>R1 (Jan 2025)</b>.</li>
+ <li><b>DeepSeek-V3</b>: 671B-parameter <b>mixture-of-experts</b>; pre-trained on 14.8T tokens (multilingual, mostly English and Chinese, more maths and code); context extended 4K → 32K → 128K with YaRN → V3-Base. SFT on 1.5M samples for 2 epochs (reasoning data from expert models, non-reasoning from V2.5). RL with <b>GRPO</b> using a reward model plus rule-based rewards. Reported cost US$5.328M (total &lt; US$5.6M).</li>
+ <li><b>DeepSeek-R1-Zero</b>: RL directly on V3-Base (no SFT). <b>R1</b>: SFT + RL stages. R1 matched OpenAI o1 on benchmarks such as AIME 2024 and MATH-500.</li>
+</ul>
+
+<h3 id="s15"><span class="num">15</span>Exam-style practice<span class="zh">考試式練習</span></h3>
+<p class="q">1. A layer has W of size 4096 × 4096. With LoRA rank r = 8, how many trainable parameters, and what is the reduction factor?</p>
+<details class="ans"><summary>Show answer</summary><div class="formula">full: 4096 × 4096 = 16,777,216
+LoRA: 4096·8 + 8·4096 = 65,536
+reduction: 16,777,216 / 65,536 = 256×   (99.6% fewer)</div></details>
+<p class="q">2. Fine-tuning a 13B model fully in FP32 with Adam: how much memory for weights, gradients and optimiser states? Can it fit on one 80 GB GPU?</p>
+<details class="ans"><summary>Show answer</summary><div class="formula">weights 13 × 4 = 52 GB ; gradients 52 GB ; Adam m, v: 2 × 52 = 104 GB
+total = 208 GB → no; needs ≥ 3 × 80 GB GPUs, or LoRA + quantisation</div></details>
+<p class="q">3. Why is LoRA initialised with A random and B = 0? What would go wrong if both were 0?</p>
+<details class="ans"><summary>Show answer</summary><p>B = 0 makes ΔW = BA = 0, so fine-tuning starts exactly at the pre-trained model. A random gives B a non-zero gradient (∂L/∂B depends on Ax); if A were also 0, both gradients would be 0 and nothing would ever train.</p></details>
+<p class="q">4. Compare LoRA, adapter tuning and prompt tuning.</p>
+<details class="ans"><summary>Show answer</summary><div class="tbl"><table><tr><th></th><th>What's trained</th><th>Inference cost</th></tr><tr><td>LoRA</td><td>Low-rank A, B beside frozen weights</td><td>None extra (merge W₀ + BA)</td></tr><tr><td>Adapter tuning</td><td>2 inserted FC layers</td><td>Extra latency</td></tr><tr><td>Prompt (P-)tuning</td><td>Small model making virtual tokens</td><td>A few extra tokens (lookup table)</td></tr></table></div></details>
+<p class="q">5. Five self-consistency reasoning paths give final answers 18, 18, 26, 18, 9. What is the answer, and what is the drawback?</p>
+<details class="ans"><summary>Show answer</summary><p><b>18</b> (majority vote, 3 of 5). Drawback: 5× the computation of a single chain of thought.</p></details>
+
+<div class="callout zhbox"><div class="lab">中文重點</div>
+<p>訓練流程：預訓練 → 監督微調 (SFT) → RLHF。全量微調昂貴、易過擬合，亦會災難性遺忘。LoRA 假設微調改變量 ΔW 為低秩：ΔW = B(n×r)·A(r×k)，凍結 W₀，只訓練 A、B；A 隨機初始化、B 為零；部署時合併 W₀+BA，無額外推理延遲；參數由 nk 減至 r(n+k)。7B 模型全量 FP32 微調需 112 GB（權重 28 + 梯度 28 + Adam 56），LoRA 加 INT8 量化約 13 GB。提示框架 CO-STAR（情境、目標、風格、語氣、受眾、回應格式）；威脅式提示效果更差。情境學習 (ICL) 不改參數；思維鏈 (CoT)、零樣本 CoT「Let's think step by step」、自洽性取多數答案、Chain of Draft 用更少 token。P-tuning 訓練小模型產生虛擬 token。RAG：嵌入文件 → 檢索相似段落 → 交給 LLM 生成，以減少幻覺。剪枝＋蒸餾可由大模型得出小模型；寬度剪枝優於深度剪枝。</p></div>
+<div class="callout exam"><div class="lab">Likely exam questions</div><ul>
+ <li>LoRA: largest r for a given reduction (May 2025 Q4); trainable-parameter counts; advantages; why B = 0.</li>
+ <li>Memory: weights + gradients + optimiser at a given precision; which GPU fits (May 2025 Q3).</li>
+ <li>Critique a prompt against CO-STAR and fix the missing parts (Dec 2025 Q7).</li>
+ <li>Hallucination causes and practical fixes, including RAG (Dec 2025 Q6).</li>
+ <li>ICL vs fine-tuning; CoT, zero-shot CoT, self-consistency; P-tuning vs prompt engineering.</li></ul></div>
+</section>
+
+<script>
+(function(){
+ function f(n){return Math.round(n).toLocaleString('en-US');}
+ var N=document.getElementById('lN'),K=document.getElementById('lK'),R=document.getElementById('lR'),M=document.getElementById('lM'),O=document.getElementById('lOut2');
+ function lora(){var n=+N.value||0,k=+K.value||0,r=+R.value||0,m=+M.value||1;var full=n*k*m,lo=(n*r+r*k)*m;
+  O.textContent='Full fine-tune: n×k'+(m>1?' × '+m:'')+' = '+f(full)+'\nLoRA: (n·r + r·k)'+(m>1?' × '+m:'')+' = '+f(lo)+'\nReduction: '+(lo?(full/lo).toFixed(1):'–')+'× fewer ('+(full?(100-lo/full*100).toFixed(1):'–')+'% saved)'+(r>Math.min(n,k)?'\nNote: r should be much smaller than min(n, k).':'')+'\nLargest r for a 1000× reduction: '+Math.floor(n*k/(1000*(n+k))||0);}
+ [N,K,R,M].forEach(function(e){e.addEventListener('input',lora)});lora();
+ var P=document.getElementById('mP'),W=document.getElementById('mW'),T=document.getElementById('mT'),G=document.getElementById('mG'),MO=document.getElementById('mOut');
+ function mem(){var p=+P.value||0,w=+W.value/8,t=+T.value||0,g=+G.value/8;var a=p*w,b=t*g,c=2*t*g,s=a+b+c;
+  var gpus=[['T4 / RTX4080',16],['A10G',24],['V100',32],['A100',40],['A100 / H100',80]],fit='none of the single GPUs listed (needs several)';for(var i=0;i<gpus.length;i++){if(s<=gpus[i][1]){fit=gpus[i][0]+' ('+gpus[i][1]+' GB)';break;}}
+  MO.textContent='Weights        '+p+'B × '+w+' B   = '+a.toFixed(1)+' GB\nGradients      '+t+'B × '+g+' B   = '+b.toFixed(1)+' GB\nAdam m and v   2 × '+t+'B × '+g+' B = '+c.toFixed(1)+' GB\nTotal          '+s.toFixed(1)+' GB  → smallest fit: '+fit;}
+ [P,W,T,G].forEach(function(e){e.addEventListener('input',mem);e.addEventListener('change',mem)});
+ document.querySelectorAll('[data-mp]').forEach(function(b){b.addEventListener('click',function(){if(b.dataset.mp==='full'){P.value=7;W.value='32';T.value=7;G.value='32';}else{P.value=7;W.value='8';T.value=1;G.value='16';}mem();});});
+ mem();
+ var ids=['C','O','S','T','A','R'],names=['CONTEXT','OBJECTIVE','STYLE','TONE','AUDIENCE','RESPONSE'],CO=document.getElementById('cOut2'),CM=document.getElementById('cMiss');
+ function costar(){var out=[],miss=[];ids.forEach(function(k,i){var v=document.getElementById('c'+k).value.trim();if(v)out.push('# '+names[i]+' #\n'+v);else miss.push(names[i]);});CO.textContent=out.join('\n\n')||'Fill in the fields.';CM.textContent=miss.length?'Missing: '+miss.join(', ')+'. An exam answer would point these out and suggest wording.':'All six CO-STAR parts present.';}
+ ids.forEach(function(k){document.getElementById('c'+k).addEventListener('input',costar)});costar();
+})();
+</script>
+<section class="recall" id="recall"><h2>Recall check<span class="zh">即時測驗</span></h2><p class="qscore"></p><div class="mcq"><p class="qq">LoRA represents the weight update as…</p><div class="opts"><button class="o">ΔW = W₀ + A</button><button class="o" data-ok>ΔW = B(n×r)·A(r×k) with r ≪ min(n,k)</button><button class="o">a new FC layer after W</button><button class="o">a quantised copy of W</button></div><div class="exp">Low-rank decomposition; only A and B are trained.</div></div><div class="mcq"><p class="qq">How are LoRA&#x27;s A and B initialised?</p><div class="opts"><button class="o">both zero</button><button class="o">both random</button><button class="o" data-ok>A random Gaussian, B zero</button><button class="o">A zero, B random</button></div><div class="exp">BA = 0 at the start, so training begins from the pre-trained model, and A ≠ 0 keeps gradients flowing.</div></div><div class="mcq"><p class="qq">n×k = 512×64 with r = 8. Trainable LoRA parameters?</p><div class="opts"><button class="o">32,768</button><button class="o" data-ok>4,608</button><button class="o">4,096</button><button class="o">512</button></div><div class="exp">512·8 + 8·64 = 4,096 + 512 (86% fewer).</div></div><div class="mcq"><p class="qq">Why does LoRA add no inference latency?</p><div class="opts"><button class="o">it skips layers</button><button class="o" data-ok>BA can be merged into W₀ before deployment</button><button class="o">it uses INT8</button><button class="o">it runs on CPU</button></div><div class="exp">Store W = W₀ + BA; adapters, by contrast, add layers.</div></div><div class="mcq"><p class="qq">Full FP32 fine-tuning of a 7B model with Adam needs about…</p><div class="opts"><button class="o">28 GB</button><button class="o">56 GB</button><button class="o" data-ok>112 GB</button><button class="o">13 GB</button></div><div class="exp">28 weights + 28 gradients + 56 for m and v.</div></div><div class="mcq"><p class="qq">Which CO-STAR letter is missing from CROFTC?</p><div class="opts"><button class="o">Context</button><button class="o">Objective</button><button class="o">Tone</button><button class="o" data-ok>Audience</button></div><div class="exp">CROFTC = Context, Role, Objective, Form, Tone, Conditions.</div></div><div class="mcq"><p class="qq">In-context learning differs from fine-tuning because…</p><div class="opts"><button class="o">it updates weights faster</button><button class="o" data-ok>it leaves the model&#x27;s parameters unchanged</button><button class="o">it needs labelled training runs</button><button class="o">it only works on BERT</button></div><div class="exp">Demonstrations go in the prompt; the model is frozen.</div></div><div class="mcq"><p class="qq">Self-consistency CoT picks the final answer by…</p><div class="opts"><button class="o">the longest chain</button><button class="o" data-ok>majority vote over several sampled reasoning paths</button><button class="o">the first path</button><button class="o">the lowest perplexity token</button></div><div class="exp">More accurate but 5–10× the compute.</div></div><div class="mcq"><p class="qq">RAG reduces hallucination by…</p><div class="opts"><button class="o">raising temperature</button><button class="o" data-ok>retrieving relevant documents and adding them to the prompt</button><button class="o">removing attention heads</button><button class="o">training a reward model</button></div><div class="exp">Ingestion → retrieval → synthesis, grounded in external facts.</div></div><div class="mcq"><p class="qq">In NVIDIA&#x27;s Minitron results, which pruning worked better?</p><div class="opts"><button class="o">depth (drop layers)</button><button class="o" data-ok>width (shrink E and H)</button><button class="o">both equal</button><button class="o">neither</button></div><div class="exp">Width pruning beat depth pruning.</div></div><p style="margin-top:12px"><button class="ibtn" data-reset-quiz>Reset quiz</button></p></section><div class="donebar"><button class="donebtn">Mark this chapter as studied</button></div><nav class="pager" aria-label="Chapter navigation"><a class="pv" href="llm-gpt.html"><small>← Previous</small><span>L7 LLM &amp; GPT</span></a><a class="nx" href="generative.html"><small>Next →</small><span>L9 Generative</span></a></nav><footer>DASC7606 Deep Learning (Dr Bethany Chan &amp; Prof Francis Chin, 2026). Notes built from lecture slides 01–09 and past papers May 2024 – Dec 2025.</footer></main><script src="app.js"></script></body></html>

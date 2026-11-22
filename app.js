@@ -86,4 +86,9 @@
     var last=S.get('dl-last'),cont=document.getElementById('continue');
     if(cont&&last){var a=document.querySelector('.card[href="'+last+'"]');if(a){cont.href=last;cont.hidden=false;cont.querySelector('span').textContent=a.querySelector('.ti').firstChild.textContent.trim();}}
   }
+
+  // topic guide: open all, open target from hash
+  document.querySelectorAll('[data-tg-all]').forEach(function(b){b.addEventListener('click',function(){var box=b.closest('section')||document;var ds=box.querySelectorAll('details.tg');var open=!b.dataset.on;ds.forEach(function(d){d.open=open;});b.dataset.on=open?'1':'';b.textContent=open?'Close all topics':'Open all topics';});});
+  function openHash(){var h=location.hash.slice(1);if(!h)return;var el=document.getElementById(h);if(el&&el.tagName==='DETAILS'){el.open=true;el.scrollIntoView();}}
+  window.addEventListener('hashchange',openHash);openHash();
 })();
